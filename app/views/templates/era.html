@@ -693,6 +693,181 @@
     }
 }
 
+/* Estilos para el botón de preparación */
+.prep-button {
+    padding: 5px 12px;
+    background: linear-gradient(145deg, #6a4b2b, #8a6b4b);
+    color: #f0d8a8;
+    border: 1px solid #c0a062;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.prep-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(145deg, #7a5b3b, #9a7b5b);
+}
+
+/* Estilos para el modal */
+.prep-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.85);
+    animation: fadeIn 0.3s ease-in;
+}
+
+.prep-modal-content {
+    position: relative;
+    background-color: rgba(30, 24, 18, 0.95);
+    margin: 5% auto;
+    padding: 25px;
+    border: 2px solid #c0a062;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+    animation: slideDown 0.4s ease-out;
+}
+
+.prep-modal-content h2 {
+    font-family: 'Cinzel', serif;
+    color: #c0a062;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.prep-modal-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #5a4526;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #c0a062;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    color: #ffd700;
+    transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes slideDown {
+    from {transform: translateY(-50px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .prep-button {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+    
+    .prep-modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 10% auto;
+    }
+    
+    .prep-modal-content h2 {
+        font-size: 18px;
+    }
+}
+
+/* Estilos adicionales para navegación de imágenes */
+.image-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.prep-image {
+    max-width: 100%;
+    height: auto;
+    display: none;
+    margin: 0 auto 15px;
+    border: 1px solid #5a4526;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.prep-image.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.image-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    padding: 10px 0;
+}
+
+.nav-button {
+    padding: 8px 15px;
+    background: linear-gradient(145deg, #5a3d1d, #7a5d3d);
+    color: #f0d8a8;
+    border: 1px solid #c0a062;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0 15px;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(145deg, #6a4d2d, #8a6d4d);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#image-counter {
+    font-family: 'EB Garamond', serif;
+    color: #c0a062;
+    font-size: 16px;
+    min-width: 50px;
+    text-align: center;
+}
+
     </style>
 <script>
         // Variables para almacenar los totales globales
@@ -2013,7 +2188,7 @@ document.addEventListener('DOMContentLoaded', function() {
         disablePerdicionControls();
     }
 
-// ========== EVENTOS PARA LAS CONDICIONES DE VICTORIA ==========
+    // ========== EVENTOS PARA LAS CONDICIONES DE VICTORIA ==========
     
     // Escuchar el evento de condiciones de victoria cumplidas
     socket.on('victory_conditions_met', function(data) {
@@ -2093,6 +2268,132 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // ========== MODAL DE PREPARACIÓN CON NAVEGACIÓN DE IMÁGENES ==========
+    
+    // Elementos del DOM
+    const prepModal = document.getElementById('prep-modal');
+    const prepButton = document.getElementById('prep-button');
+    const closeModal = document.querySelector('.close-modal');
+    const prevButton = document.getElementById('prev-image');
+    const nextButton = document.getElementById('next-image');
+    const imageCounter = document.getElementById('image-counter');
+    
+    // Variables para la navegación
+    let currentImageIndex = 0;
+    let prepImages = [];
+    
+    // Función para inicializar las imágenes y contadores
+    function initializeImageNavigation() {
+        // Seleccionar todas las imágenes disponibles
+        prepImages = document.querySelectorAll('.prep-image');
+        const totalImages = prepImages.length;
+        
+        // Actualizar el contador inicial
+        if (imageCounter) {
+            imageCounter.textContent = `1 / ${totalImages}`;
+        }
+        
+        // Deshabilitar el botón anterior inicialmente (estamos en la primera imagen)
+        if (prevButton) {
+            prevButton.disabled = true;
+        }
+        
+        // Deshabilitar el botón siguiente si solo hay una imagen
+        if (nextButton) {
+            nextButton.disabled = totalImages <= 1;
+        }
+    }
+    
+    // Función para actualizar la imagen visible
+    function updateImage() {
+        const totalImages = prepImages.length;
+        
+        // Ocultar todas las imágenes
+        prepImages.forEach(img => img.classList.remove('active'));
+        
+        // Mostrar la imagen actual
+        if (prepImages[currentImageIndex]) {
+            prepImages[currentImageIndex].classList.add('active');
+        }
+        
+        // Actualizar el contador
+        if (imageCounter) {
+            imageCounter.textContent = `${currentImageIndex + 1} / ${totalImages}`;
+        }
+        
+        // Habilitar/deshabilitar botones según la posición
+        if (prevButton) {
+            prevButton.disabled = currentImageIndex === 0;
+        }
+        if (nextButton) {
+            nextButton.disabled = currentImageIndex === totalImages - 1;
+        }
+    }
+    
+    // Evento para imagen anterior
+    if (prevButton) {
+        prevButton.addEventListener('click', function() {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                updateImage();
+            }
+        });
+    }
+    
+    // Evento para imagen siguiente
+    if (nextButton) {
+        nextButton.addEventListener('click', function() {
+            if (prepImages && currentImageIndex < prepImages.length - 1) {
+                currentImageIndex++;
+                updateImage();
+            }
+        });
+    }
+    
+    // Abrir el modal cuando se hace clic en el botón
+    if (prepButton) {
+        prepButton.addEventListener('click', function() {
+            prepModal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Evitar scroll
+            
+            // Inicializar la navegación y mostrar la primera imagen
+            currentImageIndex = 0;
+            initializeImageNavigation();
+            updateImage();
+        });
+    }
+    
+    // Cerrar el modal cuando se hace clic en la X
+    if (closeModal) {
+        closeModal.addEventListener('click', function() {
+            prepModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restaurar scroll
+        });
+    }
+    
+    // Cerrar el modal si se hace clic fuera de él
+    window.addEventListener('click', function(event) {
+        if (event.target === prepModal) {
+            prepModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restaurar scroll
+        }
+    });
+    
+    // Añadir evento para tecla Escape y navegación con flechas
+    window.addEventListener('keydown', function(event) {
+        if (prepModal && prepModal.style.display === 'block') {
+            if (event.key === 'Escape') {
+                prepModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restaurar scroll
+            } else if (event.key === 'ArrowLeft' && currentImageIndex > 0) {
+                currentImageIndex--;
+                updateImage();
+            } else if (event.key === 'ArrowRight' && prepImages && currentImageIndex < prepImages.length - 1) {
+                currentImageIndex++;
+                updateImage();
+            }
+        }
+    });
 });
 
 // Añadir la nueva función closeVictoryNotification al bloque <script> si no está incluida en el código JavaScript anterior
@@ -2123,14 +2424,42 @@ function closeVictoryNotification() {
             <a href="{{ url_for('auth.logout') }}" class="back-link">← Cerrar sesión</a>
         {% endif %}
         
-        <h1>
-            {% if mesa_name %}
-                {{ mesa_name }} - {{ era|capitalize }}
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 15px;">
+    {% if mesa_name %}
+        <span>{{ mesa_name }} - {{ era|capitalize }}</span>
+    {% else %}
+        <span>{{ room.name }} - {{ era|capitalize }}</span>
+    {% endif %}
+    <button id="prep-button" class="prep-button">Preparación</button>
+</h1>
+
+<!-- Modal para la imagen de preparación con imágenes específicas por era -->
+<div id="prep-modal" class="prep-modal">
+    <div class="prep-modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Preparación - {{ era|capitalize }}</h2>
+        <div class="image-container">
+            {% if era == "pasado" %}
+                <!-- Imágenes para la era Pasado -->
+                <img src="{{ url_for('static', filename='images/preparacion_base.png') }}" alt="Preparación Pasado 1" class="prep-image active">
+                <img src="{{ url_for('static', filename='images/preparacion_pasado.png') }}" alt="Preparación Pasado 2" class="prep-image">
+            {% elif era == "presente" %}
+                <!-- Imágenes para la era Presente -->
+                <img src="{{ url_for('static', filename='images/preparacion_base.png') }}" alt="Preparación Presente 1" class="prep-image active">
+                <img src="{{ url_for('static', filename='images/preparacion_presente.png') }}" alt="Preparación Presente 2" class="prep-image">
             {% else %}
-                {{ room.name }} - {{ era|capitalize }}
+                <!-- Imágenes para la era Futuro -->
+                <img src="{{ url_for('static', filename='images/preparacion_base.png') }}" alt="Preparación Futuro 1" class="prep-image active">
+                <img src="{{ url_for('static', filename='images/preparacion_futuro.png') }}" alt="Preparación Futuro 2" class="prep-image">
             {% endif %}
-        </h1>
+        </div>
+        <div class="image-navigation">
+            <button id="prev-image" class="nav-button">&lt; Anterior</button>
+            <span id="image-counter">1 / 2</span>
+            <button id="next-image" class="nav-button">Siguiente &gt;</button>
+        </div>
     </div>
+</div>
 
 	<!-- SECCIÓN DE ANUNCIOS -->
     <div class="section-container">
