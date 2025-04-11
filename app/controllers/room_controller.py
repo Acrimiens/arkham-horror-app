@@ -1,13 +1,16 @@
 # app/controllers/room_controller.py
 from flask import Blueprint, render_template, redirect, url_for, session, flash, request, jsonify
 from app.models.auth import Auth
-from app.models.game_data import GameData # Importar la clase refactorizada
+from app.models.game_data import GameData
 from app import socketio # Importar socketio global
 from flask_socketio import emit, join_room, leave_room
 import traceback
-import json # Para posibles errores de JSON
+import json
+from copy import deepcopy # Asegúrate que esté importado si lo usas
 
-# ... (Blueprint y otras importaciones) ...
+# --- DEFINE EL BLUEPRINT AQUÍ ---
+room_bp = Blueprint('game', __name__)
+# -----------------------------
 
 # --- EJEMPLO DE RUTA 'era' REFACORIZADA ---
 @room_bp.route('/era/<int:room_id>/<era>')
