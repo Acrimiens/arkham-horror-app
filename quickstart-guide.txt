@@ -1,0 +1,82 @@
+# Guía de Inicio Rápido
+
+Esta guía te ayudará a verificar que la aplicación funcione correctamente después de la reorganización.
+
+## 1. Configuración del entorno
+
+1. Clona el repositorio (o copia los archivos a tu directorio de trabajo)
+2. Crea y activa un entorno virtual:
+   ```bash
+   python -m venv venv
+   # En Windows:
+   venv\Scripts\activate
+   # En Linux/Mac:
+   source venv/bin/activate
+   ```
+3. Instala las dependencias:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## 2. Ejecuta la aplicación en modo desarrollo
+
+```bash
+python run.py
+```
+
+La aplicación debería iniciarse en modo de desarrollo y estar disponible en: http://localhost:5000
+
+## 3. Verificar la funcionalidad de login
+
+1. **Login como mesa**:
+   - Utiliza uno de los códigos de mesa predefinidos, por ejemplo: `mesa01`
+   - Deberías ser redirigido a la era correspondiente (pasado, presente, futuro)
+
+2. **Login como administrador**:
+   - Usa las credenciales: `admin1` / `clave1`
+   - Deberías ser redirigido al panel de administración
+
+## 4. Verificar la funcionalidad del panel de administración
+
+1. **Añadir un nuevo grupo**:
+   - Haz clic en el botón "+ Crear"
+   - Debería crearse un nuevo grupo con sus códigos de mesa correspondientes
+
+2. **Generar códigos QR**:
+   - Haz clic en "Ver e Imprimir Todos los QR"
+   - Deberías ver todos los códigos QR generados correctamente
+
+3. **Acceder a un grupo específico**:
+   - Haz clic en "Acceder" para cualquier grupo
+   - Deberías poder ver y seleccionar las diferentes eras
+
+## 5. Verificar la funcionalidad de las eras
+
+1. **Activar/desactivar anuncios**:
+   - Intenta activar varios anuncios
+   - Verifica que las dependencias se respeten (algunos anuncios requieren que otros estén activos)
+
+2. **Contador de Biff Tannen**:
+   - Incrementa el contador de derrotas
+   - Verifica que se actualice correctamente
+
+3. **Contadores de recursos**:
+   - Agrega y envía recursos en los diferentes contadores
+   - Verifica que se reflejen en los totales
+
+## Problemas comunes y soluciones
+
+- **Errores de importación**: Verifica que las carpetas contengan archivos `__init__.py` correctos.
+- **Errores de ruta**: Asegúrate de que las rutas en los controladores coincidan con las referencias en los templates.
+- **Errores de Socket.IO**: Verifica que la configuración de Socket.IO sea correcta tanto en el servidor como en el cliente.
+
+## Despliegue en Render
+
+1. Sube el código a un repositorio Git
+2. Crea un nuevo servicio web en Render vinculado a tu repositorio
+3. Usa la configuración de `render.yaml` o configura manualmente:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 wsgi:app`
+   - Variables de entorno:
+     - `RENDER`: `true`
+     - `FLASK_ENV`: `production`

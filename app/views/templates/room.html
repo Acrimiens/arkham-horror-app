@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room.name }} - Arkham Horror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <!-- Agregar Socket.IO cliente -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'EB Garamond', serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #0a0a0a;
+            background-image: url('https://i.postimg.cc/8PGqXKYC/borja-pindado-ah-walkingthroughtime-borjapindado-1.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #d4c8a8;
+            min-height: 100vh;
+        }
+        .content-wrapper {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .era-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .era-link {
+            font-family: 'Cinzel', serif;
+            text-decoration: none;
+            color: #c0a062;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            background-color: rgba(20, 20, 20, 0.8);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid #3a3223;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .era-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+            background-color: rgba(30, 24, 18, 0.9);
+        }
+        .era-link.pasado:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.ibb.co/KxTvNyS/past-symbol.png');
+            background-size: 40px;
+            background-repeat: no-repeat;
+            background-position: 95% center;
+            opacity: 0.3;
+        }
+        .era-link.presente:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.ibb.co/0jZ3FBM/elder-sign.png');
+            background-size: 40px;
+            background-repeat: no-repeat;
+            background-position: 95% center;
+            opacity: 0.3;
+        }
+        .era-link.futuro:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.ibb.co/Kzmh91y/future-symbol.png');
+            background-size: 40px;
+            background-repeat: no-repeat;
+            background-position: 95% center;
+            opacity: 0.3;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #a89c8a;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: #c0a062;
+        }
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .subtitle {
+            color: #a89c8a;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 18px;
+            font-style: italic;
+        }
+        .admin-badge {
+            display: inline-block;
+            background-color: #492222;
+            color: #ff9999;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 0 auto 15px auto;
+            border: 1px solid #6d3636;
+            text-align: center;
+            width: 150px;
+        }
+        
+        /* Media query para dispositivos móviles */
+        @media (max-width: 768px) {
+            body {
+                background-position: 30% center;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .subtitle {
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+            .era-link {
+                padding: 12px;
+            }
+            .content-wrapper {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .era-link:before {
+                background-size: 30px;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Socket.IO
+            const socket = io();
+            
+            // Para cualquier funcionalidad futura en la página de sala
+            const currentRoom = {{ room.id }};
+            
+            // Unirse a la sala al cargar la página
+            socket.on('connect', function() {
+                console.log('Connected to Socket.IO');
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="content-wrapper">
+        {% if is_admin %}
+            <div class="admin-badge">MODO ADMINISTRADOR</div>
+        {% endif %}
+        
+        {% if is_admin %}
+            <a href="{{ url_for('admin.panel') }}" class="back-link">← Volver al panel de admin</a>
+        {% else %}
+            <a href="{{ url_for('auth.logout') }}" class="back-link">← Cerrar sesión</a>
+        {% endif %}
+        
+        <h1>{{ room.name }}</h1>
+        <div class="subtitle">Elige tu era</div>
+    </div>
+    
+    <div class="content-wrapper">
+        <div class="era-nav">
+            <a href="{{ url_for('game.era', room_id=room.id, era='pasado') }}" class="era-link pasado">Pasado</a>
+            <a href="{{ url_for('game.era', room_id=room.id, era='presente') }}" class="era-link presente">Presente</a>
+            <a href="{{ url_for('game.era', room_id=room.id, era='futuro') }}" class="era-link futuro">Futuro</a>
+        </div>
+    </div>
+</body>
+</html>

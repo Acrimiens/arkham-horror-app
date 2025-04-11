@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Arkham Horror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <!-- Agregar Socket.IO cliente -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'EB Garamond', serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #0a0a0a;
+            background-image: url('https://i.postimg.cc/8PGqXKYC/borja-pindado-ah-walkingthroughtime-borjapindado-1.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #d4c8a8;
+            min-height: 100vh;
+        }
+        .content-wrapper {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .admin-title {
+            background-color: #3d2e16;
+            color: #c0a062;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            border: 1px solid #5a4526;
+        }
+        .group-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .group-card {
+            background-color: rgba(30, 24, 18, 0.9);
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .group-name {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: #c0a062;
+            margin-bottom: 15px;
+        }
+        .group-link {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        .group-link:hover {
+            background-color: #5a4526;
+        }
+        .logout-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #a89c8a;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+        .logout-link:hover {
+            color: #c0a062;
+        }
+        .admin-badge {
+            display: inline-block;
+            background-color: #492222;
+            color: #ff9999;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #6d3636;
+            text-align: center;
+            width: 120px;
+            margin: 0 auto 15px auto;
+        }
+        
+        /* Animación para nuevo grupo */
+        @keyframes highlight {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(192, 160, 98, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); }
+        }
+        
+        .highlight-animation {
+            animation: highlight 1.5s ease-in-out;
+        }
+        
+        /* Estilos para el botón de reinicio del servidor */
+        .server-actions {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(73, 34, 34, 0.8);
+            border: 1px solid #6d3636;
+            border-radius: 8px;
+            position: relative;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .server-actions-title {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: #ff9999;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+        
+        .server-reset-button {
+            padding: 10px 20px;
+            background-color: #6d2525;
+            color: #ffcccc;
+            border: 2px solid #8f3636;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .server-reset-button:hover {
+            background-color: #8f3636;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .warning-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        .alert-message {
+            background-color: #3d2e16;
+            color: #c0a062;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #5a4526;
+            text-align: center;
+        }
+        
+        /* Nuevos estilos para la sección de códigos QR */
+        .qr-section {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(61, 46, 22, 0.8);
+            border: 1px solid #5a4526;
+            border-radius: 8px;
+            position: relative;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .qr-section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: #c0a062;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+        
+        .qr-section p {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #a89c8a;
+        }
+        
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .qr-card {
+            background-color: rgba(20, 16, 10, 0.8);
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .qr-title {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            color: #c0a062;
+            margin-bottom: 5px;
+        }
+        
+        .qr-details {
+            font-size: 12px;
+            color: #a89c8a;
+            margin-bottom: 10px;
+        }
+        
+        .qr-link {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .qr-link:hover {
+            background-color: #5a4526;
+            transform: translateY(-2px);
+        }
+        
+        /* Media query para dispositivos móviles */
+        @media (max-width: 768px) {
+            body {
+                background-position: 30% center;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .content-wrapper {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .group-grid {
+                grid-template-columns: 1fr;
+            }
+            .server-actions, .qr-section {
+                padding: 15px;
+            }
+            .server-actions-title, .qr-section-title {
+                font-size: 16px;
+            }
+            .server-reset-button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+            .qr-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Socket.IO
+            const socket = io();
+            
+            // Escuchar actualizaciones de salas
+            socket.on('room_update', function(data) {
+                updateRoomGrid(data.rooms);
+            });
+            
+            // Escuchar eventos de reinicio del servidor
+            socket.on('server_reset', function(data) {
+                alert(data.message);
+                window.location.reload();
+            });
+            
+            // Función para actualizar la cuadrícula de salas
+            function updateRoomGrid(rooms) {
+                const grid = document.getElementById('group-grid');
+                if (!grid) return;
+                
+                // Guardar la referencia al último elemento (botón de añadir)
+                const addForm = document.getElementById('add-room-form');
+                
+                // Limpiar la cuadrícula actual
+                grid.innerHTML = '';
+                
+                // Añadir las salas actualizadas
+                rooms.forEach(room => {
+                    const card = document.createElement('div');
+                    card.className = 'group-card';
+                    if (room.id === rooms.length) { // Si es la sala recién añadida
+                        card.classList.add('highlight-animation');
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="group-name">${room.name}</div>
+                        <a href="/room/${room.id}" class="group-link">Acceder</a>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+                
+                // Volver a añadir el formulario para agregar nueva sala
+                if (addForm) {
+                    grid.appendChild(addForm);
+                }
+            }
+            
+            // Agregar el manejador para el botón de reinicio de ciclo de perdición
+            document.getElementById('reset-perdicion-cycle').addEventListener('click', function() {
+                if (confirm("¿Estás seguro de que deseas reiniciar el ciclo de perdición? Esto volverá al primer ciclo y pondrá el contador a 0.")) {
+                    fetch('/admin/reset_perdicion_cycle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Ciclo de perdición reiniciado correctamente");
+                        } else {
+                            alert("Error: " + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("Ha ocurrido un error al reiniciar el ciclo de perdición");
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="content-wrapper">
+        <h1>Panel de Administración</h1>
+        <div class="admin-badge">ADMINISTRADOR</div>
+        
+        {% if get_flashed_messages(category_filter=["success"]) %}
+            <div class="alert-message">
+                {{ get_flashed_messages(category_filter=["success"])[0] }}
+            </div>
+        </div>
+        
+        <div class="server-actions">
+            <div class="server-actions-title">Acciones del Servidor</div>
+            
+            <div style="margin-bottom: 15px;">
+                <button id="reset-perdicion-cycle" class="server-reset-button" style="background-color: #3d2e16; border-color: #5a4526;">
+                    Reiniciar Ciclo de Perdición
+                </button>
+            </div>
+            
+            <form action="{{ url_for('admin.reset_server') }}" method="post" id="server-reset-form">
+                <!-- Botón de tipo submit en lugar de button -->
+                <input type="submit" value="⚠ Reiniciar Servidor" class="server-reset-button" 
+                       onclick="return confirm('¡ADVERTENCIA! Estás a punto de reiniciar COMPLETAMENTE el servidor. Todos los datos de progreso, recursos y contadores serán borrados. Esta acción no se puede deshacer. ¿Estás seguro de que deseas continuar?') && 
+                               confirm('Por favor, confirma nuevamente que deseas reiniciar el servidor. Todos los datos se perderán.');">
+            </form>
+            
+            <p style="font-size: 12px; margin-top: 10px; color: #ff9999;">
+                Esta acción reiniciará todos los datos del juego: progreso, recursos y contadores.
+            </p>
+        </div>
+        
+        <a href="{{ url_for('auth.logout') }}" class="logout-link">Cerrar Sesión</a>
+    </div>
+</body>
+</html>
+        {% endif %}
+        
+        <div class="admin-title">Selecciona un grupo para administrar</div>
+        
+        <div class="group-grid" id="group-grid">
+            {% for room in rooms %}
+                <div class="group-card">
+                    <div class="group-name">{{ room.name }}</div>
+                    <a href="{{ url_for('game.room', room_id=room.id) }}" class="group-link">Acceder</a>
+                </div>
+            {% endfor %}
+            
+            <form action="{{ url_for('admin.add_room') }}" method="post" id="add-room-form" class="group-card" style="background-color: rgba(61, 46, 22, 0.7);">
+                <div class="group-name">Añadir Grupo</div>
+                <button type="submit" class="group-link" style="cursor: pointer; border: 1px dashed #5a4526;">+ Crear</button>
+            </form>
+        </div>
+        
+        <!-- Sección de Códigos QR -->
+        <div class="qr-section">
+            <div class="qr-section-title">Códigos QR para Mesas</div>
+            
+            <p>Genera e imprime códigos QR para que los jugadores puedan acceder directamente a sus mesas asignadas escaneando el código con su teléfono.</p>
+            
+            <a href="{{ url_for('admin.print_all_qr') }}" class="group-link" style="margin-bottom: 20px;">Ver e Imprimir Todos los QR</a>
+            
+            <div class="qr-grid">
+                {% for mesa_code, mesa_info in mesa_access_codes.items() %}
+                    {% set group_id = mesa_info.group %}
+                    {% set era = mesa_info.era %}
+                    {% set mesa_name = "Mesa " + mesa_code[4:].zfill(2).upper() %}
+                    <div class="qr-card">
+                        <div class="qr-title">{{ mesa_name }}</div>
+                        <div class="qr-details">Grupo {{ group_id }} - {{ era|capitalize }}</div>
+                        <a href="{{ url_for('admin.generate_qr', mesa_code=mesa_code) }}" class="qr-link" download="qr_{{ mesa_code }}.png">Descargar QR</a>
+                    </div>
+                {% endfor %}
+            </div>

@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'AH LCG';
+    src: url('AHLCG.woff2') format('woff2'),
+        url('AHLCG.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Códigos QR para Mesas - Arkham Horror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'EB Garamond', serif;
+            margin: 0;
+            padding: 15px;
+            background-color: white;
+            color: #333;
+        }
+        
+        .header {
+            font-family: 'Cinzel', serif;
+            padding: 15px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            margin-bottom: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        
+        .admin-actions {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 0 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: #5a4526;
+        }
+        
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .qr-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            page-break-inside: avoid;
+        }
+        
+        .qr-image {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .qr-details {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .qr-title {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .print-instruction {
+            text-align: center;
+            margin: 20px 0;
+            color: #555;
+            font-style: italic;
+        }
+        
+        @media print {
+            .header, .admin-actions, .print-instruction {
+                display: none;
+            }
+            
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
+            .qr-grid {
+                gap: 10px;
+            }
+            
+            .qr-card {
+                box-shadow: none;
+                border: 1px solid #eee;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Códigos QR para Mesas</h1>
+        <p>2º Aniversario de Ignota Alicante</p>
+    </div>
+    
+    <div class="admin-actions">
+        <a href="{{ url_for('admin.panel') }}" class="btn">← Volver al Panel</a>
+        <button onclick="window.print()" class="btn">Imprimir Códigos QR</button>
+    </div>
+    
+    <div class="print-instruction">
+        <p>Estos códigos QR permitirán a los jugadores acceder directamente a su mesa asignada escaneándolos con su teléfono.</p>
+        <p>Para imprimir todos los códigos, haz clic en el botón "Imprimir Códigos QR" o utiliza Ctrl+P (Cmd+P en Mac).</p>
+    </div>
+    
+    <div class="qr-grid">
+        {% for mesa_code, qr_data in mesa_qr_data.items() %}
+            <div class="qr-card">
+                <div class="qr-title">{{ qr_data.mesa_name }}</div>
+                <img src="data:image/png;base64,{{ qr_data.img_base64 }}" alt="QR {{ qr_data.mesa_name }}" class="qr-image">
+                <div class="qr-details">
+                    <p>{{ qr_data.group_name }} - {{ qr_data.era_name }}</p>
+                    <p>Código: {{ mesa_code }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

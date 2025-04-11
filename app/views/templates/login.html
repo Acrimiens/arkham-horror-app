@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arkham Horror - 2º Aniversario de Ignota Alicante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'EB Garamond', serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #0a0a0a;
+            background-image: url('https://i.postimg.cc/8PGqXKYC/borja-pindado-ah-walkingthroughtime-borjapindado-1.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #d4c8a8;
+            text-align: center;
+            min-height: 100vh;
+        }
+        .content-wrapper {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .welcome-title {
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #c0a062;
+            margin: 20px 0 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            letter-spacing: 2px;
+        }
+        .welcome-subtitle {
+            font-size: 22px;
+            color: #a89c8a;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .arkham-logo {
+            max-width: 200px;
+            margin: 20px auto;
+            filter: sepia(0.5) brightness(0.9);
+        }
+        .login-form {
+            max-width: 350px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: rgba(30, 24, 18, 0.9);
+            border: 1px solid #5a4526;
+            color: #c0a062;
+            font-family: 'EB Garamond', serif;
+            font-size: 16px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        .submit-button {
+            padding: 12px 25px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        .submit-button:hover {
+            background-color: #5a4526;
+            transform: translateY(-2px);
+        }
+        .error-message {
+            background-color: rgba(73, 34, 34, 0.8);
+            color: #ff9999;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #b55252;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: rgba(30, 24, 18, 0.7);
+            color: #a89c8a;
+            border: 1px solid #5a4526;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background-color: #3d2e16;
+            color: #c0a062;
+        }
+        .tab:first-child {
+            border-radius: 5px 0 0 5px;
+        }
+        .tab:last-child {
+            border-radius: 0 5px 5px 0;
+        }
+        .form-container {
+            display: none;
+        }
+        .form-container.active {
+            display: block;
+        }
+        
+        /* Media query para dispositivos móviles */
+        @media (max-width: 768px) {
+            body {
+                background-position: 30% center;
+                padding: 10px;
+            }
+            .welcome-title {
+                font-size: 22px;
+            }
+            .welcome-subtitle {
+                font-size: 18px;
+            }
+            .arkham-logo {
+                max-width: 150px;
+                margin: 15px auto;
+            }
+            .content-wrapper {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+    <script>
+        function showForm(formId) {
+            // Ocultar todos los formularios
+            document.querySelectorAll('.form-container').forEach(function(form) {
+                form.classList.remove('active');
+            });
+            
+            // Desactivar todas las pestañas
+            document.querySelectorAll('.tab').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar el formulario seleccionado
+            document.getElementById(formId).classList.add('active');
+            
+            // Activar la pestaña seleccionada
+            document.querySelector('[onclick="showForm(\'' + formId + '\')"]').classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <div class="content-wrapper">
+       
+        <div class="welcome-title">Bienvenido al 2º aniversario de Ignota Alicante</div>
+        <div class="welcome-subtitle">Accede a tu mesa asignada</div>
+    </div>
+    
+    <div class="content-wrapper">
+        {% if get_flashed_messages(category_filter=["error"]) %}
+            <div class="error-message">
+                {{ get_flashed_messages(category_filter=["error"])[0] }}
+            </div>
+        {% endif %}
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="showForm('user-form')">Mesa</div>
+            <div class="tab" onclick="showForm('admin-form')">Administrador</div>
+        </div>
+        
+        <div id="user-form" class="form-container active">
+            <form method="post" class="login-form">
+                <div class="form-group">
+                    <input type="text" name="access_code" class="input-field" placeholder="Código de la Mesa (Ej: mesa01)" required>
+                </div>
+                <button type="submit" class="submit-button">Acceder</button>
+            </form>
+        </div>
+        
+        <div id="admin-form" class="form-container">
+            <form method="post" class="login-form">
+                <div class="form-group">
+                    <input type="text" name="admin_username" class="input-field" placeholder="Usuario Admin" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="admin_password" class="input-field" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="submit-button">Acceder como Admin</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

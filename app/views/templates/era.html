@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if mesa_name %}{{ mesa_name }}{% else %}{{ room.name }} - {{ era|capitalize }}{% endif %} - Arkham Horror</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+@font-face {
+  font-family: 'AHLCG';
+  src: url('{{ url_for("static", filename="fonts/AHLCG.woff") }}') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+        /* Estilos Base */
+        body {
+            font-family: 'EB Garamond', serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #0a0a0a;
+            background-image: url('https://i.postimg.cc/8PGqXKYC/borja-pindado-ah-walkingthroughtime-borjapindado-1.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #d4c8a8;
+            min-height: 100vh;
+        }
+        
+        .content-wrapper {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #a89c8a;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #c0a062;
+        }
+        
+        /* Contenedores y títulos de sección */
+        .section-container {
+            background-color: rgba(20, 20, 20, 0.8);
+            border: 1px solid #3a3223;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+            margin: 20px auto;
+            max-width: 800px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #c0a062;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+        
+        /* Badges */
+        .admin-badge {
+            display: inline-block;
+            background-color: #492222;
+            color: #ff9999;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 0 auto 15px auto;
+            border: 1px solid #6d3636;
+            text-align: center;
+            width: 150px;
+        }
+        
+        .mesa-badge {
+            display: inline-block;
+            background-color: #3d2e16;
+            color: #c0a062;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Cinzel', serif;
+            margin: 0 auto 15px auto;
+            border: 1px solid #5a4526;
+            text-align: center;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+/* Estilos para la sección de anuncios */
+        .announcements-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .game-button {
+            background-color: #232323;
+            border: 1px solid #3a3223;
+            padding: 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            position: relative;
+            color: #a89c8a;
+            min-height: 70px;
+            font-family: 'EB Garamond', serif;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .game-button:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-button.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #c0a062;
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(192, 160, 98, 0.5);
+        }
+        
+        /* Estilos específicos para cada era */
+        .era-pasado .game-button.available {
+            background-color: #2d4a2d;
+            border-color: #4CAF50;
+        }
+        
+        .era-pasado .game-button.active {
+            background-color: #376937;
+            color: #d2e3d2;
+            border-color: #6abf6a;
+        }
+        
+        .era-presente .game-button.available {
+            background-color: #4a4a2d;
+            border-color: #b5b552;
+        }
+        
+        .era-presente .game-button.active {
+            background-color: #5c5c30;
+            color: #f0f0d8;
+            border-color: #d6d670;
+        }
+        
+        .era-futuro .game-button.available {
+            background-color: #4a2d2d;
+            border-color: #b55252;
+        }
+        
+        .era-futuro .game-button.active {
+            background-color: #5c3030;
+            color: #f0d8d8;
+            border-color: #d67070;
+        }
+        
+        .era-futuro .button-futuro-2.available {
+            background-color: #2d3a4a;
+            border-color: #5277b6;
+        }
+        
+        .era-futuro .button-futuro-2.active {
+            background-color: #30425c;
+            color: #d8e4f0;
+            border-color: #70a1d6;
+        }
+        
+        /* Estilos para el botón de Biff Tannen */
+        .biff-button-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .biff-button {
+            padding: 15px 25px;
+            background: linear-gradient(145deg, #e6bc54, #c0a062);
+            color: #3d2e16;
+            border: 2px solid #daa520;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        .biff-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(145deg, #edcc79, #d4b775);
+        }
+/* Estilos completos para la sección de recursos */
+        .resources-flex {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: nowrap; /* Evita que los elementos se envuelvan */
+        }
+        
+        .resource-block {
+            flex: 1;
+            min-width: 0; /* Permite que el bloque se comprima si es necesario */
+            background-color: rgba(30, 24, 18, 0.9);
+            border: 1px solid #5a4526;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .resource-block h3 {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            font-size: 16px;
+            margin: 0 0 8px 0;
+            white-space: nowrap; /* Evita que el título se divida en múltiples líneas */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Muestra '...' si el texto es demasiado largo */
+        }
+        
+        /* Botones + y - con centrado corregido */
+        .btn-plus, .btn-minus {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #5a4526;
+            background-color: #3d2e16;
+            color: #c0a062;
+            font-size: 20px;
+            cursor: pointer;
+            margin: 5px auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            
+            /* Mejoras para centrar el texto */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0; /* Eliminar cualquier padding */
+            line-height: 1; /* Corregir la altura de línea */
+            text-align: center;
+        }
+        
+        .btn-plus:hover, .btn-minus:hover, .btn-send:hover {
+            background-color: #5a4526;
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-minus {
+            background-color: #492222;
+            border-color: #6d3636;
+            margin-bottom: 8px;
+        }
+        
+        .btn-minus:hover {
+            background-color: #6d3636;
+        }
+        
+        .btn-send {
+            padding: 6px 10px;
+            background-color: #2d405a;
+            color: #a0c0e0;
+            border: 1px solid #405c8a;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: block;
+            margin: 0 auto 10px auto;
+            width: 80%; /* Ancho fijo para que quepa bien en pantallas pequeñas */
+            transition: all 0.2s ease;
+        }
+        
+        .value-display {
+            width: 50px;
+            height: 36px;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            margin: 5px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background-color: rgba(20, 16, 10, 0.8);
+            color: #c0a062;
+        }
+        
+        /* Estilos para los contadores Enviado y Global */
+        .total-display, .global-display {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #a89c8a;
+            padding-top: 6px;
+        }
+        
+        .total-display {
+            border-top: 1px dotted #5a4526;
+            margin-bottom: 2px;
+        }
+        
+        .global-display {
+            color: #b7a992;
+            margin-bottom: 0;
+        }
+        
+        .total-display span:last-child, .global-display span:last-child {
+            color: #c0a062;
+            font-weight: bold;
+            margin-left: 3px;
+        }
+        
+        .global-display span:last-child {
+            color: #d4b775; /* Color un poco más claro para diferenciarlo */
+        }
+        
+        /* Animación para resaltar actualizaciones */
+        @keyframes highlight {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(192, 160, 98, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); }
+        }
+        
+        .highlight-animation {
+            animation: highlight 1s ease-in-out;
+        }
+/* Estilos para los botones de reset */
+        .reset-buttons-container {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .reset-button {
+            background-color: #492222;
+            color: #ff9999;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #6d3636;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .reset-button:hover {
+            background-color: #6d3636;
+            transform: translateY(-2px);
+        }
+        
+        /* Estilos para la notificación del juego */
+        .game-notification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .game-notification.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .notification-content {
+            background-color: rgba(30, 24, 18, 0.9);
+            border: 2px solid #c0a062;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .notification-content p {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        .notification-btn {
+            padding: 10px 25px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background-color: #5a4526;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para controles deshabilitados */
+        .btn-plus.disabled, .btn-minus.disabled, .btn-send.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .cycle-indicator {
+            display: block;
+            width: fit-content;
+            margin: 5px auto 8px auto;
+            font-size: 12px;
+            background-color: #492222;
+            color: #ff9999;
+            padding: 3px 8px;
+            border-radius: 3px;
+            border: 1px solid #6d3636;
+            text-align: center;
+        }
+
+        /* Estilos para Fluzo desactivado */
+        .fluzo-disabled {
+            opacity: 0.7;
+            background-color: rgba(20, 20, 20, 0.9);
+            pointer-events: none;
+        }
+
+        .fluzo-disabled h3 {
+            color: #8a7a58; /* Color más apagado */
+        }
+
+
+/* Responsive para móviles (ajusta el tamaño pero mantiene la disposición horizontal) */
+        @media (max-width: 600px) {
+            body {
+                background-position: 30% center;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .content-wrapper {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .section-container {
+                padding: 15px;
+                margin: 15px auto;
+            }
+            
+            .section-title {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            
+            .game-button {
+                padding: 15px;
+                font-size: 14px;
+                min-height: 60px;
+            }
+            
+            .status-badge {
+                font-size: 10px;
+                padding: 2px 6px;
+            }
+            
+            .resources-flex {
+                gap: 5px; /* Espacio más pequeño entre columnas */
+            }
+            
+            .resource-block {
+                padding: 8px 5px;
+            }
+            
+            .resource-block h3 {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            .btn-plus, .btn-minus {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+                
+                /* Asegurar que sigue centrado */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .value-display {
+                width: 40px;
+                height: 30px;
+                font-size: 16px;
+            }
+            
+            .btn-send {
+                padding: 5px 8px;
+                font-size: 12px;
+                width: 90%;
+            }
+            
+            .total-display, .global-display {
+                font-size: 12px;
+            }
+            
+            .reset-buttons-container {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            .reset-button {
+                font-size: 11px;
+                padding: 4px 8px;
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* Para pantallas muy pequeñas, reducir aún más pero mantener horizontal */
+        @media (max-width: 360px) {
+            .resources-flex {
+                gap: 3px;
+            }
+            
+            .resource-block {
+                padding: 5px 3px;
+            }
+            
+            .btn-plus, .btn-minus {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+                margin: 3px auto;
+                
+                /* Asegurar que sigue centrado */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .value-display {
+                width: 36px;
+                height: 28px;
+                font-size: 14px;
+            }
+            
+            .btn-send {
+                padding: 4px 6px;
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+            
+            .total-display, .global-display {
+                font-size: 11px;
+            }
+
+            /* Estilo para el botón de Biff cuando está desactivado */
+            .biff-button.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background: linear-gradient(145deg, #a8a8a8, #888888);
+                color: #333333;
+                text-decoration: line-through;
+                border-color: #666666;
+                box-shadow: none;
+                pointer-events: none;
+            }
+
+            .biff-button.disabled:hover {
+                transform: none;
+                box-shadow: none;
+                background: linear-gradient(145deg, #a8a8a8, #888888);
+            }
+
+        }
+
+/* Estilos para la notificación de victoria */
+#victory-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+#victory-notification.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#victory-notification .notification-content {
+    background-color: rgba(30, 20, 10, 0.95);
+    border: 3px solid #ffd700;
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+    animation: victoryPulse 2s infinite alternate;
+}
+
+#victory-notification p {
+    font-family: 'Cinzel', serif;
+    color: #ffd700;
+    font-size: 32px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+#victory-notification .notification-btn {
+    padding: 12px 30px;
+    background-color: #443311;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+#victory-notification .notification-btn:hover {
+    background-color: #664411;
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes victoryPulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.03);
+    }
+}
+
+    </style>
+<script>
+        // Variables para almacenar los totales globales
+        const globalTotals = {
+            'perdicion': 0,
+            'reserva': 0,
+            'perdicion_cycle': 1
+        };
+        
+        // Función para confirmar el desmarcado de anuncios
+        function confirmDemarking(buttonIdx, isActive) {
+            // Obtener el elemento del botón actual para verificar su estado real
+            const buttonElement = document.querySelector(`#form-button-${buttonIdx} .game-button`);
+            
+            // Verificar si el botón tiene la clase 'active', lo que indica que está marcado
+            const isCurrentlyActive = buttonElement && buttonElement.classList.contains('active');
+            
+            // Solo mostrar confirmación si realmente estamos desmarcando (está activo actualmente)
+            if (isCurrentlyActive) {
+                return confirm(`¿Estás seguro de que deseas desmarcar este anuncio? 
+Si lo haces, todos los anuncios que dependan de éste también se desmarcarán.`);
+            }
+            
+            // Si estamos marcando (no está activo actualmente), no necesitamos confirmación
+            return true;
+        }
+        
+// ========== PERDICIÓN ==========
+// Función para actualizar el valor de perdición en la interfaz
+function updatePerdicionValue(change) {
+    // Verificar si estamos en el ciclo final
+    if (globalTotals['perdicion_cycle'] > 3) {
+        showNotification("El contador de perdición ha completado todos sus ciclos.");
+        return;
+    }
+    
+    const valueElement = document.getElementById('perdicion-value');
+    if (!valueElement) {
+        console.error("Elemento perdicion-value no encontrado");
+        return;
+    }
+    
+    let currentValue = parseInt(valueElement.innerText || '0');
+    currentValue += change;
+    
+    // Permitir valores negativos pero con límite
+    if (currentValue < 0) {
+        // El valor negativo no puede ser menor que el negativo del valor global
+        if (Math.abs(currentValue) > globalTotals['perdicion']) {
+            currentValue = -globalTotals['perdicion'];
+        }
+    }
+    
+    valueElement.innerText = currentValue;
+}
+
+// Función para enviar el valor de perdición al servidor
+function sendPerdicionValue() {
+    // Verificar si estamos en el ciclo final
+    if (globalTotals['perdicion_cycle'] > 3) {
+        showNotification("El contador de perdición ha completado todos sus ciclos.");
+        return;
+    }
+
+    const valueElement = document.getElementById('perdicion-value');
+    if (!valueElement) {
+        console.error("Elemento perdicion-value no encontrado");
+        return;
+    }
+
+    const currentValue = parseInt(valueElement.innerText || '0');
+
+    if (currentValue === 0) {
+        return; // No enviar si el valor es cero
+    }
+
+    // Verificar límite para valores negativos
+    if (currentValue < 0) {
+        // Verificar que no se intente reducir más allá de cero en el global
+        if (Math.abs(currentValue) > globalTotals['perdicion']) {
+            // Informar al usuario y limitar el valor al máximo permitido
+            const maxNegative = -globalTotals['perdicion'];
+            showNotification(`No se puede reducir más allá de 0. Valor ajustado a ${maxNegative}.`);
+            
+            // Ajustar el valor al máximo permitido
+            valueElement.innerText = maxNegative.toString();
+            return;
+        }
+    }
+
+    // Resetear el contador a 0
+    valueElement.innerText = '0';
+
+    // Guardamos el ciclo actual antes de enviar
+    const currentCycle = globalTotals['perdicion_cycle'];
+    
+    // Enviar al servidor usando la nueva ruta específica para perdición
+    fetch('/update_perdicion/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: currentValue
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar total local con datos del servidor
+            const totalElement = document.getElementById('perdicion-total');
+            if (totalElement && data.columnTotal !== undefined) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+    
+            // Actualizar total global
+            const globalElement = document.getElementById('perdicion-global');
+            if (globalElement && data.globalTotal !== undefined) {
+                globalTotals['perdicion'] = data.globalTotal;
+                globalElement.innerText = data.globalTotal;
+                
+                // Añadir animación de resaltado
+                globalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    globalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Actualizar el ciclo de perdición si cambió
+            if (data.perdicionCycle !== undefined) {
+                updatePerdicionCycle(data.perdicionCycle);
+            }
+            
+            // Mostrar notificación si existe
+            if (data.notification) {
+                showNotification(data.notification);
+            }
+        } else if (data.error) {
+            // Mostrar error si existe
+            showNotification("Error: " + data.error);
+            // Restaurar el valor en caso de error
+            valueElement.innerText = currentValue.toString();
+        }
+    })
+    .catch(error => {
+        console.error("Error al enviar perdición:", error);
+        showNotification("Error de conexión: No se pudo enviar el valor de perdición");
+        // Restaurar el valor en caso de error
+        valueElement.innerText = currentValue.toString();
+    });
+}
+
+
+// Función para activar/desactivar Fluzo basado en el ciclo de perdición
+function toggleFluzoBasedOnCycle(cycle, isInitialLoad = false) {
+    const fluzoBlock = document.querySelector('.resource-block:nth-child(3)'); // La tercera columna es Fluzo
+    const fluzoBtns = fluzoBlock.querySelectorAll('button');
+    const fluzoValue = fluzoBlock.querySelector('#fluzo-value');
+    
+    if (!fluzoBlock) return;
+    
+    if (cycle === 1) {
+        // Desactivar Fluzo en Plan 1a
+        fluzoBlock.classList.add('fluzo-disabled');
+        fluzoBtns.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('disabled');
+        });
+        if (fluzoValue) {
+            fluzoValue.style.opacity = '0.5';
+        }
+    } else {
+        // Activar Fluzo en otros planes
+        fluzoBlock.classList.remove('fluzo-disabled');
+        fluzoBtns.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('disabled');
+        });
+        if (fluzoValue) {
+            fluzoValue.style.opacity = '1';
+            // Asegurarnos que la caja siempre muestre 0
+            fluzoValue.innerText = '0';
+        }
+        
+        // Si estamos pasando del ciclo 1 al ciclo 2 (no en carga inicial)
+        if (cycle === 2 && !isInitialLoad) {
+            // Valores posibles
+            const possibleValues = [70, 71, 72, 73, 74, 75, 80, 81, 82, 83, 84, 85];
+            
+            // Seleccionar un valor aleatorio
+            const randomValue = possibleValues[Math.floor(Math.random() * possibleValues.length)];
+            
+            // Llamar al servidor para establecer el valor aleatorio
+            setRandomFluzoValue(randomValue);
+        }
+    }
+}
+
+// Función modificada para establecer un valor aleatorio para Fluzo
+function setRandomFluzoValue(newValue) {
+    // No actualizar la caja, solo enviamos al servidor
+    
+    // Enviar el valor al servidor
+    fetch('/set_fluzo_value/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            value: newValue,
+            silent: true  // Indicador para no mostrar notificación
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar solo el total con el valor del servidor
+            const totalElement = document.getElementById('fluzo-total');
+            if (totalElement && data.fluzoTotal !== undefined) {
+                totalElement.innerText = data.fluzoTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Mantener la caja en 0
+            const valueElement = document.getElementById('fluzo-value');
+            if (valueElement) {
+                valueElement.innerText = '0';
+            }
+            
+            // Ya NO mostramos notificación sobre el valor aleatorio
+        } else if (data.error) {
+            // Mostrar error (mantenemos esto para diagnóstico)
+            showNotification("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error al establecer valor aleatorio de fluzo:", error);
+        showNotification("Error de conexión: No se pudo establecer el valor de fluzo");
+    });
+}
+
+// Modificar la función existente updatePerdicionCycle para detectar el cambio de ciclo
+function updatePerdicionCycle(cycle) {
+    // Guardar el ciclo anterior para detectar la transición específica de 2 a 3
+    const previousCycle = globalTotals['perdicion_cycle'];
+    
+    // Actualizar el valor global
+    globalTotals['perdicion_cycle'] = cycle;
+    
+    const cycleIndicator = document.getElementById('perdicion-cycle');
+    if (cycleIndicator) {
+        let cycleText = "";
+        switch(cycle) {
+            case 1:
+                cycleText = "Plan 1a";
+                break;
+            case 2:
+                cycleText = "Plan 1a. Primer avance";
+                break;
+            case 3:
+                cycleText = "Plan 1a. Segundo avance";
+                break;
+            default:
+                cycleText = "->R2";
+                break;
+        }
+        cycleIndicator.textContent = cycleText;
+        
+        // Si estamos en el ciclo 4 (después del tercer ciclo), deshabilitar controles de perdición
+        if (cycle > 3) {
+            disablePerdicionControls();
+        } else {
+            enablePerdicionControls();
+        }
+        
+        // Activar/desactivar Fluzo según el ciclo
+        toggleFluzoBasedOnCycle(cycle);
+        
+        // Detectar la transición específica del ciclo 2 al ciclo 3
+        if (previousCycle === 2 && cycle === 3) {
+            // Cuando cambiamos al "Plan 1a. Segundo avance", ajustar el valor de Fluzo
+            adjustFluzoBasedOnRules();
+        }
+    }
+}
+
+// Nueva función para ajustar el valor de Fluzo según las reglas especificadas
+function adjustFluzoBasedOnRules() {
+    // Obtener el valor actual de Fluzo
+    const fluzoTotalElement = document.getElementById('fluzo-total');
+    if (!fluzoTotalElement) return;
+    
+    const currentFluzoValue = parseInt(fluzoTotalElement.innerText || '0');
+    let newFluzoValue = currentFluzoValue;
+    
+    // Aplicar las reglas de ajuste:
+    if (currentFluzoValue > 86) {
+        newFluzoValue = currentFluzoValue - 10;
+    } else if (currentFluzoValue < 76) {
+        newFluzoValue = currentFluzoValue + 10;
+    } else if (currentFluzoValue >= 80 && currentFluzoValue <= 82) {
+        newFluzoValue = currentFluzoValue - 5;
+    }
+    
+    // Si el valor ha cambiado, actualizarlo en el servidor
+    if (newFluzoValue !== currentFluzoValue) {
+        // Enviar directamente el valor al servidor sin modificar la caja
+        fetch('/set_fluzo_value/{{ room.id }}/{{ era }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                value: newFluzoValue,
+                silent: false  // Ahora mostramos notificación
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error de red: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // El servidor ya enviará la actualización a través de WebSocket
+                // y mostrará la notificación cuando llegue el evento
+                //showNotification("El nivel de Fluzo condensado ha sido alterado");
+            }
+        })
+        .catch(error => {
+            console.error("Error al ajustar valor de fluzo:", error);
+        });
+    }
+}
+
+// ========== RESERVA ==========
+// Función para actualizar el valor de reserva en la interfaz
+function updateReservaValue(change) {
+    const valueElement = document.getElementById('reserva-value');
+    if (!valueElement) {
+        console.error("Elemento reserva-value no encontrado");
+        return;
+    }
+    
+    let currentValue = parseInt(valueElement.innerText || '0');
+    currentValue += change;
+    
+    // Permitir valores negativos pero con límite
+    if (currentValue < 0) {
+        // El valor negativo no puede ser menor que el negativo del valor global
+        if (Math.abs(currentValue) > globalTotals['reserva']) {
+            currentValue = -globalTotals['reserva'];
+        }
+    }
+    
+    valueElement.innerText = currentValue;
+}
+
+// Función para enviar el valor de reserva al servidor
+function sendReservaValue() {
+    const valueElement = document.getElementById('reserva-value');
+    if (!valueElement) {
+        console.error("Elemento reserva-value no encontrado");
+        return;
+    }
+
+    const currentValue = parseInt(valueElement.innerText || '0');
+
+    if (currentValue === 0) {
+        return; // No enviar si el valor es cero
+    }
+
+    // Verificar límite para valores negativos
+    if (currentValue < 0) {
+        // Verificar que no se intente reducir más allá de cero en el global
+        if (Math.abs(currentValue) > globalTotals['reserva']) {
+            // Informar al usuario y limitar el valor al máximo permitido
+            const maxNegative = -globalTotals['reserva'];
+            showNotification(`No se puede reducir más allá de 0. Valor ajustado a ${maxNegative}.`);
+            
+            // Ajustar el valor al máximo permitido
+            valueElement.innerText = maxNegative.toString();
+            return;
+        }
+    }
+
+    // Resetear el contador a 0
+    valueElement.innerText = '0';
+
+    // Enviar al servidor usando la ruta específica para reserva
+    fetch('/update_reserva/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: currentValue
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar total local con datos del servidor
+            const totalElement = document.getElementById('reserva-total');
+            if (totalElement && data.columnTotal !== undefined) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+    
+            // Actualizar total global
+            const globalElement = document.getElementById('reserva-global');
+            if (globalElement && data.globalTotal !== undefined) {
+                globalTotals['reserva'] = data.globalTotal;
+                globalElement.innerText = data.globalTotal;
+                
+                // Añadir animación de resaltado
+                globalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    globalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+        } else if (data.error) {
+            // Mostrar error si existe
+            showNotification("Error: " + data.error);
+            // Restaurar el valor en caso de error
+            valueElement.innerText = currentValue.toString();
+        }
+    })
+    .catch(error => {
+        console.error("Error al enviar reserva:", error);
+        showNotification("Error de conexión: No se pudo enviar el valor de reserva");
+        // Restaurar el valor en caso de error
+        valueElement.innerText = currentValue.toString();
+    });
+}
+
+// ========== FLUZO ==========
+
+// Función para actualizar el valor de Fluzo
+function updateFluzoValue(change) {
+    // Si Consecuencias Imprevistas ya está completado, no permitir cambios
+    if (consecuenciasImprevistasCompleted) {
+        showNotification("Se ha completado Consecuencias Imprevistas. Fluzo condensado está bloqueado.");
+        return;
+    }
+
+    const valueElement = document.getElementById('fluzo-value');
+    if (!valueElement) {
+        console.error("Elemento fluzo-value no encontrado");
+        return;
+    }
+    
+    // Obtener el valor actual y aplicar el cambio
+    let currentValue = parseInt(valueElement.innerText || '0');
+    let newValue = currentValue + change;
+    
+    // Actualizar el valor en pantalla inmediatamente
+    valueElement.innerText = newValue;
+}
+
+// Definir variable global para el estado de Consecuencias Imprevistas
+let consecuenciasImprevistasCompleted = false;
+
+// Función para comprobar el valor de Fluzo - adaptada para valores negativos
+function checkFluzoValue() {
+    // Si Consecuencias Imprevistas ya está completado, no permitir cambios
+    if (consecuenciasImprevistasCompleted) {
+        showNotification("Se ha completado Consecuencias Imprevistas. Fluzo condensado está bloqueado.");
+        return;
+    }
+
+    const valueElement = document.getElementById('fluzo-value');
+    if (!valueElement) {
+        console.error("Elemento fluzo-value no encontrado");
+        return;
+    }
+
+    const currentValue = parseInt(valueElement.innerText || '0');
+    const totalElement = document.getElementById('fluzo-total');
+    const currentTotal = totalElement ? parseInt(totalElement.innerText || '0') : 0;
+    
+    // Reset del valor en la caja después de comprobar
+    const valueToCheck = currentValue;
+    valueElement.innerText = '0';
+    valueElement.classList.remove('negative'); // Quitar clase visual de negativo
+    
+    // Calcular el nuevo total (que ahora puede disminuir si valueToCheck es negativo)
+    const newTotal = currentTotal + valueToCheck;
+    
+    // Asegurarse de que no sea un valor negativo en el total
+    const finalTotal = Math.max(0, newTotal);
+    
+    // Determinar mensaje basado en el valor y el ciclo actual
+    let message = null;
+    if (globalTotals['perdicion_cycle'] === 2) {
+        // Plan 1a. Primer avance (ciclo 2)
+        if (finalTotal < 78) {
+            message = "El valor de fluzo condensado es inferior a la media";
+        } else if (finalTotal > 78) {
+            message = "El valor de fluzo condensado es superior a la media";
+        } else if (finalTotal === 78) {
+            message = "¡Estas en la media! No alteres más tu valor de fluzo condensado, trata de ayudar a otros grupos colocando pistas en la Reserva temporal";
+        }
+    } else if (globalTotals['perdicion_cycle'] === 3) {
+        // Plan 1a. Segundo avance (ciclo 3)
+        if (finalTotal < 81) {
+            message = "El valor de fluzo condensado es inferior a la media";
+        } else if (finalTotal > 81) {
+            message = "El valor de fluzo condensado es superior a la media";
+        } else if (finalTotal === 81) {
+            message = "¡Estas en la media! No alteres más tu valor de fluzo condensado, trata de ayudar a otros grupos colocando pistas en la Reserva temporal";
+        }
+    }
+    
+    // Enviar al servidor con el mensaje correspondiente
+    sendFluzoCheckResult(finalTotal, valueToCheck, message);
+}
+
+
+// Función para enviar el resultado de la comprobación al servidor
+function sendFluzoCheckResult(newTotal, checkedValue, customMessage = null) {
+    fetch('/check_fluzo_value/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            total_value: newTotal,
+            checked_value: checkedValue,
+            custom_message: customMessage
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar el total con el valor del servidor
+            const totalElement = document.getElementById('fluzo-total');
+            if (totalElement && data.fluzoTotal !== undefined) {
+                totalElement.innerText = data.fluzoTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Si hay un mensaje especial, mostrarlo
+            if (data.message) {
+                showNotification(data.message);
+            }
+            
+            // Verificar si se ha completado Consecuencias Imprevistas
+            if (data.consecuenciasCompleted) {
+                consecuenciasImprevistasCompleted = true;
+                disableFluzoControls();
+            }
+        } else if (data.error) {
+            // Mostrar error
+            showNotification("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error al comprobar fluzo:", error);
+        showNotification("Error de conexión: No se pudo comprobar el valor de fluzo");
+    });
+}
+
+// Función para deshabilitar los controles de Fluzo
+function disableFluzoControls() {
+    const fluzoBlock = document.querySelector('.resource-block:nth-child(3)'); // La tercera columna es Fluzo
+    
+    if (!fluzoBlock) return;
+    
+    // Aplicar clase de deshabilitado
+    fluzoBlock.classList.add('fluzo-disabled');
+    
+    // Deshabilitar todos los botones
+    const fluzoBtns = fluzoBlock.querySelectorAll('button');
+    fluzoBtns.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+    });
+    
+    // Ajustar opacidad del valor
+    const fluzoValue = fluzoBlock.querySelector('#fluzo-value');
+    if (fluzoValue) {
+        fluzoValue.style.opacity = '0.5';
+    }
+    
+    // Agregar mensaje de informativo en el bloque
+    const infoMsg = document.createElement('div');
+    infoMsg.className = 'consecuencias-completed';
+    infoMsg.style.color = '#ff9999';
+    infoMsg.style.fontSize = '12px';
+    infoMsg.style.textAlign = 'center';
+    infoMsg.style.marginTop = '5px';
+    infoMsg.textContent = "Consecuencias Imprevistas completado";
+    
+    // Agregar el mensaje solo si no existe ya
+    if (!fluzoBlock.querySelector('.consecuencias-completed')) {
+        fluzoBlock.appendChild(infoMsg);
+    }
+}
+
+
+
+
+// Función mejorada para mostrar una notificación
+function showNotification(message) {
+    // Crear el elemento de notificación si no existe
+    let notification = document.getElementById('game-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'game-notification';
+        notification.className = 'game-notification';
+        
+        // Contenido de la notificación
+        notification.innerHTML = `
+            <div class="notification-content">
+                <p></p>
+                <button class="notification-btn" onclick="closeNotification()">Aceptar</button>
+            </div>
+        `;
+        
+        // Agregar al cuerpo del documento
+        document.body.appendChild(notification);
+    }
+    
+    // Actualizar el mensaje
+    notification.querySelector('p').innerHTML = message;
+    
+    // Hacer que aparezca con una animación
+    notification.classList.add('show');
+}
+
+// Función para cerrar la notificación
+function closeNotification() {
+    const notification = document.getElementById('game-notification');
+    if (notification) {
+        notification.classList.remove('show');
+    }
+}
+        
+// Función para deshabilitar los controles de Perdición
+function disablePerdicionControls() {
+    const perdicionPlus = document.querySelector('[onclick="updatePerdicionValue(1)"]');
+    const perdicionMinus = document.querySelector('[onclick="updatePerdicionValue(-1)"]');
+    const perdicionSend = document.querySelector('[onclick="sendPerdicionValue()"]');
+    
+    if (perdicionPlus) {
+        perdicionPlus.disabled = true;
+        perdicionPlus.classList.add('disabled');
+    }
+    if (perdicionMinus) {
+        perdicionMinus.disabled = true;
+        perdicionMinus.classList.add('disabled');
+    }
+    if (perdicionSend) {
+        perdicionSend.disabled = true;
+        perdicionSend.classList.add('disabled');
+    }
+}
+
+// Función para habilitar los controles de Perdición
+function enablePerdicionControls() {
+    const perdicionPlus = document.querySelector('[onclick="updatePerdicionValue(1)"]');
+    const perdicionMinus = document.querySelector('[onclick="updatePerdicionValue(-1)"]');
+    const perdicionSend = document.querySelector('[onclick="sendPerdicionValue()"]');
+    
+    if (perdicionPlus) {
+        perdicionPlus.disabled = false;
+        perdicionPlus.classList.remove('disabled');
+    }
+    if (perdicionMinus) {
+        perdicionMinus.disabled = false;
+        perdicionMinus.classList.remove('disabled');
+    }
+    if (perdicionSend) {
+        perdicionSend.disabled = false;
+        perdicionSend.classList.remove('disabled');
+    }
+}
+
+// Función actualizada para manejar la desactivación del botón de Biff
+function updateBiffButton(defeats, disableButton = false) {
+    const biffButton = document.getElementById('biff-button');
+    if (!biffButton) return;
+    
+    let text = "";
+    if (defeats === 0) {
+        text = "Sin derrotas";
+    } else if (defeats === 1) {
+        text = "Derrotado 1 vez";
+    } else {
+        text = `Derrotado ${defeats} veces`;
+    }
+    
+    biffButton.textContent = text;
+    
+    // Aplicar animación de resaltado
+    biffButton.classList.add('highlight-animation');
+    
+    // Eliminar la animación después de que termine
+    setTimeout(() => {
+        biffButton.classList.remove('highlight-animation');
+    }, 1000);
+    
+    // Desactivar el botón si es necesario
+    if (disableButton) {
+        biffButton.disabled = true;
+        biffButton.classList.add('disabled');
+        biffButton.style.opacity = '0.5';
+        biffButton.style.cursor = 'not-allowed';
+        biffButton.title = 'Biff Tannen ha sido añadido a la zona de victoria';
+    }
+}
+
+// Función actualizada para derrotar a Biff
+function defeatBiff() {
+    fetch('/biff_defeat/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})  // Enviar un objeto vacío para asegurar formato correcto
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            updateBiffButton(data.defeats, data.disable_button);
+            console.log("Biff ha sido derrotado", data.defeats, "veces");
+            
+            // Mostrar el mensaje de Biff si existe
+            if (data.message) {
+                showNotification(data.message);
+            }
+        } else {
+            console.error("Error al actualizar las derrotas de Biff:", data.error);
+            showNotification("Error: " + (data.error || "No se pudo actualizar las derrotas de Biff"));
+        }
+    })
+    .catch(error => {
+        console.error("Error en la solicitud:", error);
+        showNotification("Error de conexión al actualizar las derrotas de Biff");
+    });
+}
+
+// Función mejorada para resetear los anuncios
+function resetAnnouncements() {
+    if (!confirm("¿Estás seguro de que deseas resetear TODOS los anuncios de esta era?")) {
+        return;
+    }
+    
+    fetch('/reset_announcements/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página inmediatamente para mostrar cambios
+            window.location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Ha ocurrido un error al resetear los anuncios.");
+    });
+}
+
+// Función mejorada para resetear las derrotas de Biff
+function resetBiff() {
+    if (!confirm("¿Estás seguro de que deseas resetear el contador de derrotas de Biff?")) {
+        return;
+    }
+    
+    fetch('/reset_biff/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página inmediatamente para mostrar cambios
+            window.location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Ha ocurrido un error al resetear el contador de Biff.");
+    });
+}
+
+// Función mejorada para resetear un contador de columna específico
+function resetColumn(column) {
+    if (!confirm(`¿Estás seguro de que deseas resetear el contador de ${column}?`)) {
+        return;
+    }
+    
+    fetch(`/reset_column/{{ room.id }}/${column}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página inmediatamente para mostrar cambios
+            window.location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert(`Ha ocurrido un error al resetear el contador de ${column}.`);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Socket.IO
+    const socket = io();
+    
+    // Variables para almacenar el estado actual
+    const currentRoom = {{ room.id }};
+    const currentEra = "{{ era }}";
+    
+    // Unirse a la sala correspondiente
+    socket.emit('join', { room: `room_${currentRoom}` });
+    
+    // Verificar el estado inicial de Fluzo basado en el ciclo de perdición
+    const initialPerdicionCycle = {{ perdicion_cycle }};
+    toggleFluzoBasedOnCycle(initialPerdicionCycle, true); // true indica que es carga inicial
+
+    // Verificar si el botón de Biff ya está desactivado
+    const biffButton = document.getElementById('biff-button');
+    if (biffButton && biffButton.classList.contains('disabled')) {
+        biffButton.disabled = true;
+        biffButton.style.opacity = '0.5';
+        biffButton.style.cursor = 'not-allowed';
+        biffButton.title = 'Biff Tannen ha sido añadido a la zona de victoria';
+    }
+
+    
+    // ========== EVENTOS PARA PERDICIÓN ==========
+    
+    // Evento de actualización de perdición
+    socket.on('perdicion_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            // Actualizar el total local
+            const totalElement = document.getElementById('perdicion-total');
+            if (totalElement) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Actualizar el ciclo si está presente
+            if (data.perdicionCycle) {
+                updatePerdicionCycle(data.perdicionCycle);
+            }
+            
+            // Mostrar notificación si existe
+            if (data.notification) {
+                showNotification(data.notification);
+            }
+        }
+    });
+    
+    // Evento de actualización global de perdición
+    socket.on('global_perdicion_update', function(data) {
+        // Actualizar el total global
+        const globalElement = document.getElementById('perdicion-global');
+        if (globalElement) {
+            globalTotals['perdicion'] = data.globalTotal;
+            globalElement.innerText = data.globalTotal;
+            
+            // Añadir animación de resaltado
+            globalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                globalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+        
+        // Actualizar el ciclo si está presente
+        if (data.perdicionCycle) {
+            updatePerdicionCycle(data.perdicionCycle);
+        }
+        
+        // Mostrar notificación si existe
+        if (data.notification) {
+            showNotification(data.notification);
+        }
+    });
+    
+    // Evento de completado de ciclo de perdición (afecta a todos los clientes)
+    socket.on('perdicion_cycle_completed', function(data) {
+        console.log("¡Se ha completado un ciclo de perdición!", data);
+        
+        // Reiniciar el contador de "perdición" en la interfaz actual
+        const perdicionTotalElement = document.getElementById('perdicion-total');
+        if (perdicionTotalElement) {
+            perdicionTotalElement.innerText = '0';
+            perdicionTotalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                perdicionTotalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+        
+        // Actualizar el ciclo de perdición
+        updatePerdicionCycle(data.perdicionCycle);
+        
+        // Actualizar el contador global a 0
+        const globalElement = document.getElementById('perdicion-global');
+        if (globalElement) {
+            globalTotals['perdicion'] = 0;
+            globalElement.innerText = '0';
+            
+            // Añadir animación de resaltado
+            globalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                globalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+        
+        // Mostrar notificación solo en la era y sala donde se originó el evento
+        if (currentRoom === data.originRoom && currentEra === data.originEra && data.notification) {
+            showNotification(data.notification);
+        }
+        
+        // Si estamos pasando al ciclo 3, mostrar la notificación de Fluzo modificado
+        if (data.perdicionCycle === 3) {
+            showNotification("El nivel de Fluzo condensado ha sido alterado");
+        }
+    });
+    
+    // ========== EVENTOS PARA RESERVA ==========
+    
+    // Evento de actualización de reserva
+    socket.on('reserva_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            // Actualizar el total local
+            const totalElement = document.getElementById('reserva-total');
+            if (totalElement) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+        }
+    });
+    
+    // Evento de actualización global de reserva
+    socket.on('global_reserva_update', function(data) {
+        // Actualizar el total global
+        const globalElement = document.getElementById('reserva-global');
+        if (globalElement) {
+            globalTotals['reserva'] = data.globalTotal;
+            globalElement.innerText = data.globalTotal;
+            
+            // Añadir animación de resaltado
+            globalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                globalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+    });
+    
+    // ========== EVENTOS PARA FLUZO ==========
+    
+    // Evento de actualización de fluzo
+    socket.on('fluzo_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            console.log("Recibido evento de actualización de fluzo", data);
+            
+            // Actualizar el valor en pantalla (la caja)
+            const valueElement = document.getElementById('fluzo-value');
+            if (valueElement && data.fluzoValue !== undefined) {
+                valueElement.innerText = data.fluzoValue;
+            }
+            
+            // Actualizar el total acumulado
+            const totalElement = document.getElementById('fluzo-total');
+            if (totalElement && data.fluzoTotal !== undefined) {
+                totalElement.innerText = data.fluzoTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Verificar el estado de Consecuencias Imprevistas
+            if (data.consecuenciasCompleted) {
+                consecuenciasImprevistasCompleted = true;
+                disableFluzoControls();
+            }
+            
+            // Si hay un mensaje y NO estamos en modo silencioso, mostrarlo
+            if (data.message && !data.silent) {
+                showNotification(data.message);
+            }
+            // Si es un valor aleatorio, NO mostrar la notificación si está marcado como silencioso
+            else if (data.isRandomValue && !data.silent) {
+                //showNotification(`¡La energía de Fluzo condensado se ha estabilizado en ${data.fluzoTotal}!`);
+            }
+        }
+    });
+    
+    // ========== EVENTOS PARA CONSECUENCIAS IMPREVISTAS ==========
+    
+    // Evento cuando se completa Consecuencias Imprevistas (se enviará a todos los clientes)
+    socket.on('consecuencias_imprevistas_completed', function(data) {
+        console.log("Recibido evento de Consecuencias Imprevistas completado", data);
+        
+        // Actualizar el estado global
+        consecuenciasImprevistasCompleted = true;
+        
+        // Deshabilitar controles de Fluzo
+        disableFluzoControls();
+        
+        // Mostrar notificación
+        if (data.message) {
+            showNotification(data.message);
+        }
+    });
+
+    // ========== OTROS EVENTOS ==========
+    
+    // Escuchar eventos de reinicio del servidor
+    socket.on('server_reset', function(data) {
+        alert(data.message);
+        window.location.reload();
+    });
+    
+    // Escuchar eventos de actualización de botones
+    socket.on('button_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala
+        if (data.room_id === currentRoom) {
+            console.log("Recibido evento de actualización de botones", data);
+            
+            // Si estamos en la misma era del botón que cambió, actualizamos la UI
+            if (currentEra === data.era) {
+                // Actualizar el estado del botón que cambió
+                const buttonForm = document.getElementById(`form-button-${data.button_idx}`);
+                if (buttonForm) {
+                    const buttonElement = buttonForm.querySelector('button');
+                    if (data.is_activating) {
+                        // Si se está activando
+                        buttonElement.classList.add('active');
+                        if (!buttonElement.querySelector('.status-badge')) {
+                            // Agregar la etiqueta de "Completado" si no existe
+                            const badge = document.createElement('span');
+                            badge.className = 'status-badge';
+                            badge.textContent = 'Completado';
+                            buttonElement.appendChild(badge);
+                        }
+                    } else {
+                        // Si se está desactivando
+                        buttonElement.classList.remove('active');
+                        const badge = buttonElement.querySelector('.status-badge');
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                }
+            }
+            
+            // Actualizar el estado de todos los botones según las dependencias
+            // para reflejar qué botones están disponibles
+            for (const era in data.available_buttons) {
+                if (era === currentEra) {
+                    // Actualizar los botones de la era actual
+                    data.available_buttons[era].forEach((isAvailable, idx) => {
+                        const buttonForm = document.getElementById(`form-button-${idx}`);
+                        if (buttonForm) {
+                            const buttonElement = buttonForm.querySelector('button');
+                            
+                            // Primero eliminamos todas las clases de estado
+                            buttonElement.classList.remove('available', 'disabled');
+                            
+                            // Verificar si está activo según el progress actualizado
+                            const isActive = data.progress[era][idx];
+                            
+                            if (isActive) {
+                                buttonElement.classList.add('active');
+                                if (!buttonElement.querySelector('.status-badge')) {
+                                    const badge = document.createElement('span');
+                                    badge.className = 'status-badge';
+                                    badge.textContent = 'Completado';
+                                    buttonElement.appendChild(badge);
+                                }
+                            } else {
+                                buttonElement.classList.remove('active');
+                                const badge = buttonElement.querySelector('.status-badge');
+                                if (badge) {
+                                    badge.remove();
+                                }
+                                
+                                // Si no está activo, determinar si está disponible o deshabilitado
+                                if (isAvailable) {
+                                    buttonElement.classList.add('available');
+                                    buttonElement.disabled = false;
+                                } else {
+                                    buttonElement.classList.add('disabled');
+                                    buttonElement.disabled = true;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+    
+    // Escuchar eventos de actualización de Biff
+        socket.on('biff_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            updateBiffButton(data.defeats, data.disable_button);
+        
+            // Mostrar el mensaje de Biff si existe
+            if (data.message) {
+                showNotification(data.message);
+            }
+        }
+    });
+    
+    // ========== CARGA INICIAL DE DATOS ==========
+    
+    // Obtener datos iniciales de columnas del servidor cuando se carga la página
+    fetch('/get_column_totals/' + currentRoom + '/' + currentEra, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar totales de columnas con datos del servidor
+            if (data.columnTotals) {
+                // Actualizar perdición
+                const perdicionTotalElement = document.getElementById('perdicion-total');
+                if (perdicionTotalElement && data.columnTotals.perdicion !== undefined) {
+                    perdicionTotalElement.innerText = data.columnTotals.perdicion;
+                }
+                
+                // Actualizar reserva
+                const reservaTotalElement = document.getElementById('reserva-total');
+                if (reservaTotalElement && data.columnTotals.reserva !== undefined) {
+                    reservaTotalElement.innerText = data.columnTotals.reserva;
+                }
+                
+                // Actualizar fluzo si existe
+                const fluzoTotalElement = document.getElementById('fluzo-total');
+                if (fluzoTotalElement && data.columnTotals.fluzo !== undefined) {
+                    fluzoTotalElement.innerText = data.columnTotals.fluzo;
+                }
+            }
+            
+            // Actualizar los contadores globales
+            if (data.globalTotals) {
+                // Actualizar perdición global
+                const perdicionGlobalElement = document.getElementById('perdicion-global');
+                if (perdicionGlobalElement && data.globalTotals.perdicion !== undefined) {
+                    globalTotals['perdicion'] = data.globalTotals.perdicion;
+                    perdicionGlobalElement.innerText = data.globalTotals.perdicion;
+                }
+                
+                // Actualizar reserva global
+                const reservaGlobalElement = document.getElementById('reserva-global');
+                if (reservaGlobalElement && data.globalTotals.reserva !== undefined) {
+                    globalTotals['reserva'] = data.globalTotals.reserva;
+                    reservaGlobalElement.innerText = data.globalTotals.reserva;
+                }
+                
+                // Actualizar ciclo de perdición
+                if (data.globalTotals.perdicion_cycle !== undefined) {
+                    globalTotals['perdicion_cycle'] = data.globalTotals.perdicion_cycle;
+                    updatePerdicionCycle(data.globalTotals.perdicion_cycle);
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error("Error al obtener totales de columna:", error);
+    });
+
+    // Verificar si Consecuencias Imprevistas ya está completado
+    function checkConsecuenciasImprevistasStatus() {
+        fetch('/get_global_counters', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error de red: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.globalTotals) {
+                // Actualizar el estado de Consecuencias Imprevistas
+                if (data.globalTotals.consecuencias_imprevistas) {
+                    consecuenciasImprevistasCompleted = true;
+                    disableFluzoControls();
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error al obtener estado de Consecuencias Imprevistas:", error);
+        });
+    }
+    
+    // Verificar el estado de Consecuencias Imprevistas al cargar la página
+    checkConsecuenciasImprevistasStatus();
+    
+    // Verificar si estamos en el ciclo 4 (después del tercer ciclo) al cargar
+    const perdicionCycle = {{ perdicion_cycle }};
+    if (perdicionCycle > 3) {
+        disablePerdicionControls();
+    }
+
+// ========== EVENTOS PARA LAS CONDICIONES DE VICTORIA ==========
+    
+    // Escuchar el evento de condiciones de victoria cumplidas
+    socket.on('victory_conditions_met', function(data) {
+        console.log("¡Se han cumplido las condiciones de victoria!", data);
+        
+        // Mostrar notificación especial
+        if (data.message) {
+            // Crear un estilo especial para la notificación de victoria
+            const victoryNotification = document.createElement('div');
+            victoryNotification.id = 'victory-notification';
+            victoryNotification.className = 'game-notification show';
+            victoryNotification.style.zIndex = '2000'; // Mayor que la notificación normal
+            
+            // Contenido de la notificación con estilo especial
+            victoryNotification.innerHTML = `
+                <div class="notification-content" style="background-color: rgba(30, 20, 10, 0.95); border: 3px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);">
+                    <p style="color: #ffd700; font-size: 32px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">${data.message}</p>
+                    <button class="notification-btn" style="background-color: #443311; color: #ffd700; border-color: #ffd700; font-size: 18px;" onclick="closeVictoryNotification()">¡Entendido!</button>
+                </div>
+            `;
+            
+            // Agregar al cuerpo del documento, reemplazando cualquier notificación de victoria existente
+            const existingVictory = document.getElementById('victory-notification');
+            if (existingVictory) {
+                existingVictory.remove();
+            }
+            document.body.appendChild(victoryNotification);
+            
+            // Añadir vibraciones sutiles a la notificación para llamar más la atención
+            animateVictoryNotification();
+        }
+    });
+    
+    // Función para animar la notificación de victoria
+    function animateVictoryNotification() {
+        const notification = document.getElementById('victory-notification');
+        if (!notification) return;
+        
+        const content = notification.querySelector('.notification-content');
+        if (!content) return;
+        
+        // Crear el efecto de brillo radiante
+        content.style.transition = 'box-shadow 1s ease-in-out';
+        
+        let glowIntensity = 0;
+        let growing = true;
+        
+        const glowAnimation = setInterval(() => {
+            if (growing) {
+                glowIntensity += 2;
+                if (glowIntensity >= 40) growing = false;
+            } else {
+                glowIntensity -= 2;
+                if (glowIntensity <= 10) growing = true;
+            }
+            
+            content.style.boxShadow = `0 0 ${glowIntensity}px rgba(255, 215, 0, 0.8)`;
+            
+            // Verificar si la notificación sigue existiendo
+            if (!document.getElementById('victory-notification')) {
+                clearInterval(glowAnimation);
+            }
+        }, 100);
+    }
+    
+    // Función para cerrar la notificación de victoria
+    function closeVictoryNotification() {
+        const notification = document.getElementById('victory-notification');
+        if (notification) {
+            notification.classList.remove('show');
+            // Remover después de la animación
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }
+
+});
+
+// Añadir la nueva función closeVictoryNotification al bloque <script> si no está incluida en el código JavaScript anterior
+function closeVictoryNotification() {
+    const notification = document.getElementById('victory-notification');
+    if (notification) {
+        notification.classList.remove('show');
+        // Remover después de la animación
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+}
+
+</script>
+</head>
+<body>
+    <div class="content-wrapper">
+        {% if is_admin %}
+            <div class="admin-badge">MODO ADMINISTRADOR</div>
+            <a href="{{ url_for('game.room', room_id=room.id) }}" class="back-link">← Volver al Grupo</a>
+        {% else %}
+            {% if mesa_name %}
+                <div class="mesa-badge">{{ mesa_name }}</div>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" class="back-link">← Cerrar sesión</a>
+        {% endif %}
+        
+        <h1>
+            {% if mesa_name %}
+                {{ mesa_name }} - {{ era|capitalize }}
+            {% else %}
+                {{ room.name }} - {{ era|capitalize }}
+            {% endif %}
+        </h1>
+    </div>
+
+	<!-- SECCIÓN DE ANUNCIOS -->
+    <div class="section-container">
+        <div class="section-title">Anuncios</div>
+        {% if is_admin %}
+        <div class="reset-buttons-container">
+            <button class="reset-button" onclick="resetAnnouncements()">Resetear Anuncios</button>
+        </div>
+        {% endif %}
+        <div class="announcements-grid era-{{ era }}">
+            {% for i in range(button_info|length) %}
+                <form id="form-button-{{ i }}" action="{{ url_for('game.toggle_button', room_id=room.id, era=era, button_idx=i) }}" method="post" onsubmit="return confirmDemarking({{ i }}, {{ progress[era][i]|tojson }});">
+                    <button 
+                        type="submit"
+                        class="game-button button-{{ era }}-{{ i }} 
+                               {% if progress[era][i] %}active{% endif %} 
+                               {% if not progress[era][i] and available_buttons[i] %}available{% endif %}
+                               {% if not available_buttons[i] and not progress[era][i] %}disabled{% endif %}"
+                        {% if not available_buttons[i] and not progress[era][i] %}disabled{% endif %}
+                    >
+                        <div style="width: 100%; padding-bottom: 20px;">{{ button_info[i] }}</div>
+                        {% if progress[era][i] %}
+                            <span class="status-badge">Completado</span>
+                        {% endif %}
+                    </button>
+                </form>
+            {% endfor %}
+        </div>
+    </div>
+<!-- SECCIÓN DE BIFF TANNEN -->
+    <div class="section-container">
+        <div class="section-title">Derrotas de Biff Tannen</div>
+        {% if is_admin %}
+        <div class="reset-buttons-container">
+            <button class="reset-button" onclick="resetBiff()">Resetear Biff</button>
+        </div>
+        {% endif %}
+        <div class="biff-button-container">
+            <button 
+                id="biff-button"
+                onclick="defeatBiff()"
+                class="biff-button {% if biff_disabled %}disabled{% endif %}"
+                {% if biff_disabled %}disabled{% endif %}
+                {% if biff_disabled %}title="Biff Tannen ha sido añadido a la zona de victoria"{% endif %}
+            >
+                {% if biff_defeats == 0 %}
+                    Sin derrotas
+                {% elif biff_defeats == 1 %}
+                    Derrotado 1 vez
+                {% else %}
+                    Derrotado {{ biff_defeats }} veces
+                {% endif %}
+            </button>
+        </div>
+    </div>
+<!-- SECCIÓN DE RECURSOS con funciones separadas -->
+    <div class="section-container">
+        {% if is_admin %}
+        <div class="reset-buttons-container">
+            <button class="reset-button" onclick="resetColumn('perdicion')">Resetear Perdición</button>
+            <button class="reset-button" onclick="resetColumn('reserva')">Resetear Reserva</button>
+        </div>
+        {% endif %}
+        
+        <div class="section-title">Contadores</div>
+        
+        <div class="resources-flex">
+            <!-- Perdición -->
+            <div class="resource-block">
+                <h3>Perdición</h3>
+                <div id="perdicion-cycle" class="cycle-indicator">
+                {% if perdicion_cycle == 1 %}
+                    Plan 1a
+                {% elif perdicion_cycle == 2 %}
+                    Plan 1a. Primer avance
+                {% elif perdicion_cycle == 3 %}
+                    Plan 1a. Segundo avance
+                {% else %}
+                    FIN
+                {% endif %}
+                </div>
+
+                <button class="btn-plus {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="updatePerdicionValue(1)" {% if perdicion_cycle > 3 %}disabled{% endif %}>+</button>
+                <div id="perdicion-value" class="value-display">0</div>
+                <button class="btn-minus {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="updatePerdicionValue(-1)" {% if perdicion_cycle > 3 %}disabled{% endif %}>−</button>
+                <button class="btn-send {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="sendPerdicionValue()" {% if perdicion_cycle > 3 %}disabled{% endif %}>Enviar</button>
+                <div class="total-display">
+                    <span>Enviado: </span><span id="perdicion-total">{{ column_totals.perdicion if column_totals else 0 }}</span>
+                </div>
+                <div class="global-display">
+                    <span>Global: </span><span id="perdicion-global">0</span>
+                </div>
+            </div>
+            
+            <!-- Reserva -->
+            <div class="resource-block">
+                <h3>Reserva</h3>
+                <button class="btn-plus" onclick="updateReservaValue(1)">+</button>
+                <div id="reserva-value" class="value-display">0</div>
+                <button class="btn-minus" onclick="updateReservaValue(-1)">−</button>
+                <button class="btn-send" onclick="sendReservaValue()">Enviar</button>
+                <div class="total-display">
+                    <span>Enviado: </span><span id="reserva-total">{{ column_totals.reserva if column_totals else 0 }}</span>
+                </div>
+                <div class="global-display">
+                    <span>Global: </span><span id="reserva-global">0</span>
+                </div>
+            </div>
+            
+<!-- Fluzo -->
+<div class="resource-block {% if perdicion_cycle == 1 %}fluzo-disabled{% endif %}">
+    <h3>Fluzo condensado</h3>
+    <div style="display: flex; justify-content: center; margin-bottom: 5px;">
+        <button class="btn-plus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(1)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">+1</button>
+                
+        <button class="btn-plus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(5)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">+5</button>
+    </div>
+    
+    <div id="fluzo-value" class="value-display" style="margin: 5px auto; {% if perdicion_cycle == 1 %}opacity: 0.5;{% endif %}">0</div>
+    
+    <div style="display: flex; justify-content: center; margin-top: 5px;">
+        <button class="btn-minus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(-1)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">-1</button>
+                
+        <button class="btn-minus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(-5)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">-5</button>
+    </div>
+    
+    <!-- Botón Comprobar -->
+    <button class="btn-send {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+            onclick="checkFluzoValue()" 
+            {% if perdicion_cycle == 1 %}disabled{% endif %}
+            style="margin-top: 10px;">Comprobar</button>
+    
+    <div class="total-display">
+        <span>Valor: </span><span id="fluzo-total">{{ column_totals.fluzo if column_totals else 0 }}</span>
+    </div>
+</div>
+</div>
+</div>
+<!-- Notificación con botón de Aceptar funcional -->
+    <div id="game-notification" class="game-notification">
+        <div class="notification-content">
+            <p></p>
+            <button class="notification-btn" onclick="closeNotification()">Aceptar</button>
+        </div>
+    </div>
+<!-- Notificación de victoria con animación -->
+<div id="victory-notification" class="game-notification">
+    <div class="notification-content">
+        <p>->R1</p>
+        <button class="notification-btn" onclick="closeVictoryNotification()">¡Entendido!</button>
+    </div>
+</div>
+
+</body>
+</html>
