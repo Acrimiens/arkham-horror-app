@@ -7764,3 +7764,24 @@ Archivo: C:\Users\GGTECH\Documents\PERSONAL\ARKHAM\app\views\templates\room.html
 </html>
 
 
+Archivo: C:\Users\GGTECH\Documents\PERSONAL\ARKHAM\app\__pycache__\__init__.cpython-313.pyc
+--------------------------------------------------
+ó
+
+    ¡ùgº  ã                   ó:   • S SK Jr  S SKJr  SSKJr  \" SS9rS rg)	é    )ÚFlask)ÚSocketIOé   )Ú
+get_configÚ*)Úcors_allowed_originsc                  ó   • [        [        SSS9n [        5       nU R                  R	                  U5        [
+        R
+                  U 5        SSKJn  SSK	J
+n  SSKJn  U R                  U5        U R                  USS	9  U R                  U5        U $ )
+u5   FunciÃ³n para crear y configurar la aplicaciÃ³n Flaskzviews/templatesÚstatic)Útemplate_folderÚ
+static_folderr   )Úauth_bp)Úadmin_bp)Úroom_bpz/admin)Ú
+url_prefix)r   Ú__name__r   ÚconfigÚfrom_objectÚsocketioÚinit_appÚapp.controllers.auth_controllerr
+   Ú app.controllers.admin_controllerr   Úapp.controllers.room_controllerr   Úregister_blueprint)ÚappÚ
+app_configr
+   r   r   s        Ú9C:\Users\GGTECH\Documents\PERSONAL\ARKHAM\app\__init__.pyÚ
+create_appr      s~   € ä
+”Ø 1Ø&ñ(€Cô
+ “€JØ‡JJ×Ñ˜:Ô&ô 
+×ÑcÔõ 8Ý9Ý7à×Ñ˜7Ô#Ø×Ñ˜8°ÐÑ9Ø×Ñ˜7Ô#à€Jó    N)Úflaskr   Úflask_socketior   r   r   r   r   © r   r   Ú<module>r"      s   ðÝ Ý #Ý ñ ¨Ñ-€ór   
+
+
