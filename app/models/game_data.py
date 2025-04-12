@@ -13,7 +13,7 @@ class GameData:
     # Mantenemos la informaciÃ³n estÃ¡tica de botones/dependencias aquÃ­
     button_info = {
         "pasado": [
-            "Thomas y Mary se han conocido.", "Ha empezado la financiaciÃ³n de un observatorio.",
+            "Thomas y Mary se han conocido.", "Ha empezado la financiación de un observatorio.",
             "Thomas y Mary se han inspirado en Nikola Tesla.", "Thomas y Mary se han casado.",
             "Se ha plantado la semilla de un Ã¡rbol.", "Se ha aÃ±adido \"Un noble legado\" a la zona de victoria."
         ],
