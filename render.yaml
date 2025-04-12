@@ -3,11 +3,17 @@ services:
     name: arkham-horror-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -k gevent -w 1 wsgi:app
+    # --- CAMBIO AQUÍ ---
+    # Simplemente llama a gunicorn, leerá gunicorn.conf.py
+    # y buscará 'app' en 'wsgi.py'
+    startCommand: gunicorn wsgi:app
+    # ------------------
     envVars:
       - key: RENDER
         value: true
       - key: FLASK_ENV
         value: production
+      - key: PYTHONUNBUFFERED # Buena práctica para logs en contenedores
+        value: "1"
       - key: REDIS_URL
-        value: <tu_redis_url_de_render> # Asegúrate que esta variable esté aquí
+        value: redis://red-cvsqjii4d50c73d6eg60:6379 # Asegúrate que esté aquí
