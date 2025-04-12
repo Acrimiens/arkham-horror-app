@@ -180,14 +180,24 @@
     <div class="content-wrapper">
         {% if is_admin %}
             <div class="admin-badge">MODO ADMINISTRADOR</div>
-        {% endif %}
         
-        {% if is_admin %}
-            <a href="{{ url_for('admin.panel') }}" class="back-link">← Volver al panel de admin</a>
+            <!-- Barra de navegación para administradores -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <a href="{{ url_for('admin.panel') }}" class="back-link">← Volver al panel de admin</a>
+                <a href="{{ url_for('auth.logout') }}" style="
+                    padding: 5px 12px;
+                    background-color: #492222;
+                    color: #ff9999;
+                    border: 1px solid #6d3636;
+                    border-radius: 5px;
+                    text-decoration: none;
+                    font-size: 14px;
+                    transition: all 0.3s ease;">Cerrar sesión</a>
+            </div>
         {% else %}
             <a href="{{ url_for('auth.logout') }}" class="back-link">← Cerrar sesión</a>
         {% endif %}
-        
+    
         <h1>{{ room.name }}</h1>
         <div class="subtitle">Elige tu era</div>
     </div>
