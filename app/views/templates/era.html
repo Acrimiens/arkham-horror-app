@@ -7,878 +7,2623 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
-        /* --- ESTILOS CSS (Sin cambios respecto a tu última versión) --- */
-        @font-face {
-          font-family: 'AHLCG';
-          src: url('{{ url_for("static", filename="fonts/AHLCG.woff") }}') format('woff');
-          font-weight: normal;
-          font-style: normal;
-        }
+@font-face {
+  font-family: 'AHLCG';
+  src: url('{{ url_for("static", filename="fonts/AHLCG.woff") }}') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
         /* Estilos Base */
-        body { font-family: 'EB Garamond', serif; margin: 0; padding: 15px; background-color: #0a0a0a; background-image: url('https://i.postimg.cc/8PGqXKYC/borja-pindado-ah-walkingthroughtime-borjapindado-1.jpg'); background-position: center center; background-repeat: no-repeat; background-size: cover; background-attachment: fixed; color: #d4c8a8; min-height: 100vh; }
-        .content-wrapper { background-color: rgba(0, 0, 0, 0.6); border-radius: 8px; padding: 15px; margin-bottom: 15px; max-width: 800px; margin-left: auto; margin-right: auto; }
-        h1 { font-family: 'Cinzel', serif; color: #c0a062; text-align: center; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #a89c8a; text-decoration: none; font-size: 16px; transition: color 0.3s ease; }
-        .back-link:hover { color: #c0a062; }
+        body {
+            font-family: 'EB Garamond', serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #0a0a0a;
+            background-image: url('https://i.postimg.cc/8PGqXKYC/borja-pindado-ah-walkingthroughtime-borjapindado-1.jpg');
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            color: #d4c8a8;
+            min-height: 100vh;
+        }
+        
+        .content-wrapper {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #a89c8a;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #c0a062;
+        }
+        
         /* Contenedores y títulos de sección */
-        .section-container { background-color: rgba(20, 20, 20, 0.8); border: 1px solid #3a3223; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7); margin: 20px auto; max-width: 800px; position: relative; overflow: hidden; }
-        .section-title { font-family: 'Cinzel', serif; font-size: 24px; font-weight: bold; color: #c0a062; margin-bottom: 20px; text-align: center; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); }
+        .section-container {
+            background-color: rgba(20, 20, 20, 0.8);
+            border: 1px solid #3a3223;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+            margin: 20px auto;
+            max-width: 800px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #c0a062;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+        
         /* Badges */
-        .admin-badge { display: inline-block; background-color: #492222; color: #ff9999; padding: 3px 8px; border-radius: 3px; font-size: 12px; margin: 0 auto 15px auto; border: 1px solid #6d3636; text-align: center; width: 150px; }
-        .mesa-badge { display: inline-block; background-color: #3d2e16; color: #c0a062; padding: 5px 15px; border-radius: 5px; font-size: 16px; font-family: 'Cinzel', serif; margin: 0 auto 15px auto; border: 1px solid #5a4526; text-align: center; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); }
-        /* Estilos para la sección de anuncios */
-        .announcements-grid { display: flex; flex-direction: column; gap: 15px; }
-        .game-button { background-color: #232323; border: 1px solid #3a3223; padding: 20px; border-radius: 5px; font-size: 16px; text-align: left; display: flex; align-items: center; position: relative; color: #a89c8a; min-height: 70px; font-family: 'EB Garamond', serif; transition: all 0.3s ease; cursor: pointer; }
-        .game-button:hover:not(.disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); }
-        .game-button.disabled { opacity: 0.6; cursor: not-allowed; }
-        .status-badge { position: absolute; bottom: 5px; right: 5px; font-size: 12px; background-color: rgba(0, 0, 0, 0.7); color: #c0a062; padding: 3px 8px; border-radius: 10px; border: 1px solid rgba(192, 160, 98, 0.5); }
+        .admin-badge {
+            display: inline-block;
+            background-color: #492222;
+            color: #ff9999;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 0 auto 15px auto;
+            border: 1px solid #6d3636;
+            text-align: center;
+            width: 150px;
+        }
+        
+        .mesa-badge {
+            display: inline-block;
+            background-color: #3d2e16;
+            color: #c0a062;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Cinzel', serif;
+            margin: 0 auto 15px auto;
+            border: 1px solid #5a4526;
+            text-align: center;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+/* Estilos para la sección de anuncios */
+        .announcements-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .game-button {
+            background-color: #232323;
+            border: 1px solid #3a3223;
+            padding: 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            position: relative;
+            color: #a89c8a;
+            min-height: 70px;
+            font-family: 'EB Garamond', serif;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .game-button:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-button.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #c0a062;
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(192, 160, 98, 0.5);
+        }
+        
         /* Estilos específicos para cada era */
-        .era-pasado .game-button.available { background-color: #2d4a2d; border-color: #4CAF50; }
-        .era-pasado .game-button.active { background-color: #376937; color: #d2e3d2; border-color: #6abf6a; }
-        .era-presente .game-button.available { background-color: #4a4a2d; border-color: #b5b552; }
-        .era-presente .game-button.active { background-color: #5c5c30; color: #f0f0d8; border-color: #d6d670; }
-        .era-futuro .game-button.available { background-color: #4a2d2d; border-color: #b55252; }
-        .era-futuro .game-button.active { background-color: #5c3030; color: #f0d8d8; border-color: #d67070; }
-        .era-futuro .button-futuro-2.available { background-color: #2d3a4a; border-color: #5277b6; }
-        .era-futuro .button-futuro-2.active { background-color: #30425c; color: #d8e4f0; border-color: #70a1d6; }
+        .era-pasado .game-button.available {
+            background-color: #2d4a2d;
+            border-color: #4CAF50;
+        }
+        
+        .era-pasado .game-button.active {
+            background-color: #376937;
+            color: #d2e3d2;
+            border-color: #6abf6a;
+        }
+        
+        .era-presente .game-button.available {
+            background-color: #4a4a2d;
+            border-color: #b5b552;
+        }
+        
+        .era-presente .game-button.active {
+            background-color: #5c5c30;
+            color: #f0f0d8;
+            border-color: #d6d670;
+        }
+        
+        .era-futuro .game-button.available {
+            background-color: #4a2d2d;
+            border-color: #b55252;
+        }
+        
+        .era-futuro .game-button.active {
+            background-color: #5c3030;
+            color: #f0d8d8;
+            border-color: #d67070;
+        }
+        
+        .era-futuro .button-futuro-2.available {
+            background-color: #2d3a4a;
+            border-color: #5277b6;
+        }
+        
+        .era-futuro .button-futuro-2.active {
+            background-color: #30425c;
+            color: #d8e4f0;
+            border-color: #70a1d6;
+        }
+        
         /* Estilos para el botón de Biff Tannen */
-        .biff-button-container { text-align: center; margin: 10px 0; }
-        .biff-button { padding: 15px 25px; background: linear-gradient(145deg, #e6bc54, #c0a062); color: #3d2e16; border: 2px solid #daa520; border-radius: 5px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 18px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); }
-        .biff-button:hover:not(.disabled) { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); background: linear-gradient(145deg, #edcc79, #d4b775); }
-        /* Estilo para el botón de Biff cuando está desactivado */
-        .biff-button.disabled { opacity: 0.5; cursor: not-allowed; background: linear-gradient(145deg, #a8a8a8, #888888); color: #333333; text-decoration: line-through; border-color: #666666; box-shadow: none; pointer-events: none; }
-        .biff-button.disabled:hover { transform: none; box-shadow: none; background: linear-gradient(145deg, #a8a8a8, #888888); }
-        /* Estilos completos para la sección de recursos */
-        .resources-flex { display: flex; justify-content: space-between; gap: 10px; flex-wrap: nowrap; }
-        .resource-block { flex: 1; min-width: 0; background-color: rgba(30, 24, 18, 0.9); border: 1px solid #5a4526; border-radius: 6px; padding: 10px; text-align: center; }
-        .resource-block h3 { font-family: 'Cinzel', serif; color: #c0a062; font-size: 16px; margin: 0 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .btn-plus, .btn-minus { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #5a4526; background-color: #3d2e16; color: #c0a062; font-size: 20px; cursor: pointer; margin: 5px auto; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; text-align: center; }
-        .btn-plus:hover, .btn-minus:hover, .btn-send:hover { background-color: #5a4526; transform: translateY(-2px); transition: all 0.2s ease; }
-        .btn-minus { background-color: #492222; border-color: #6d3636; margin-bottom: 8px; }
-        .btn-minus:hover { background-color: #6d3636; }
-        .btn-send { padding: 6px 10px; background-color: #2d405a; color: #a0c0e0; border: 1px solid #405c8a; border-radius: 5px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); display: block; margin: 0 auto 10px auto; width: 80%; transition: all 0.2s ease; }
-        .value-display { width: 50px; height: 36px; border: 1px solid #5a4526; border-radius: 5px; margin: 5px auto; display: flex; align-items: center; justify-content: center; font-size: 18px; background-color: rgba(20, 16, 10, 0.8); color: #c0a062; }
-        .total-display, .global-display { margin-top: 6px; font-size: 13px; color: #a89c8a; padding-top: 6px; }
-        .total-display { border-top: 1px dotted #5a4526; margin-bottom: 2px; }
-        .global-display { color: #b7a992; margin-bottom: 0; }
-        .total-display span:last-child, .global-display span:last-child { color: #c0a062; font-weight: bold; margin-left: 3px; }
-        .global-display span:last-child { color: #d4b775; }
+        .biff-button-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .biff-button {
+            padding: 15px 25px;
+            background: linear-gradient(145deg, #e6bc54, #c0a062);
+            color: #3d2e16;
+            border: 2px solid #daa520;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        .biff-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(145deg, #edcc79, #d4b775);
+        }
+/* Estilos completos para la sección de recursos */
+        .resources-flex {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: nowrap; /* Evita que los elementos se envuelvan */
+        }
+        
+        .resource-block {
+            flex: 1;
+            min-width: 0; /* Permite que el bloque se comprima si es necesario */
+            background-color: rgba(30, 24, 18, 0.9);
+            border: 1px solid #5a4526;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .resource-block h3 {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            font-size: 16px;
+            margin: 0 0 8px 0;
+            white-space: nowrap; /* Evita que el título se divida en múltiples líneas */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Muestra '...' si el texto es demasiado largo */
+        }
+        
+        /* Botones + y - con centrado corregido */
+        .btn-plus, .btn-minus {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #5a4526;
+            background-color: #3d2e16;
+            color: #c0a062;
+            font-size: 20px;
+            cursor: pointer;
+            margin: 5px auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            
+            /* Mejoras para centrar el texto */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0; /* Eliminar cualquier padding */
+            line-height: 1; /* Corregir la altura de línea */
+            text-align: center;
+        }
+        
+        .btn-plus:hover, .btn-minus:hover, .btn-send:hover {
+            background-color: #5a4526;
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-minus {
+            background-color: #492222;
+            border-color: #6d3636;
+            margin-bottom: 8px;
+        }
+        
+        .btn-minus:hover {
+            background-color: #6d3636;
+        }
+        
+        .btn-send {
+            padding: 6px 10px;
+            background-color: #2d405a;
+            color: #a0c0e0;
+            border: 1px solid #405c8a;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: block;
+            margin: 0 auto 10px auto;
+            width: 80%; /* Ancho fijo para que quepa bien en pantallas pequeñas */
+            transition: all 0.2s ease;
+        }
+        
+        .value-display {
+            width: 50px;
+            height: 36px;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            margin: 5px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background-color: rgba(20, 16, 10, 0.8);
+            color: #c0a062;
+        }
+        
+        /* Estilos para los contadores Enviado y Global */
+        .total-display, .global-display {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #a89c8a;
+            padding-top: 6px;
+        }
+        
+        .total-display {
+            border-top: 1px dotted #5a4526;
+            margin-bottom: 2px;
+        }
+        
+        .global-display {
+            color: #b7a992;
+            margin-bottom: 0;
+        }
+        
+        .total-display span:last-child, .global-display span:last-child {
+            color: #c0a062;
+            font-weight: bold;
+            margin-left: 3px;
+        }
+        
+        .global-display span:last-child {
+            color: #d4b775; /* Color un poco más claro para diferenciarlo */
+        }
+        
         /* Animación para resaltar actualizaciones */
-        @keyframes highlight { 0% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); } 50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(192, 160, 98, 0.8); } 100% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); } }
-        .highlight-animation { animation: highlight 1s ease-in-out; }
-        /* Estilos para los botones de reset */
-        .reset-buttons-container { margin-top: 10px; text-align: right; }
-        .reset-button { background-color: #492222; color: #ff9999; padding: 5px 10px; border-radius: 4px; border: 1px solid #6d3636; font-size: 12px; cursor: pointer; margin-left: 5px; transition: all 0.2s ease; }
-        .reset-button:hover { background-color: #6d3636; transform: translateY(-2px); }
+        @keyframes highlight {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(192, 160, 98, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 160, 98, 0); }
+        }
+        
+        .highlight-animation {
+            animation: highlight 1s ease-in-out;
+        }
+/* Estilos para los botones de reset */
+        .reset-buttons-container {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .reset-button {
+            background-color: #492222;
+            color: #ff9999;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #6d3636;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .reset-button:hover {
+            background-color: #6d3636;
+            transform: translateY(-2px);
+        }
+        
         /* Estilos para la notificación del juego */
-        .game-notification { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
-        .game-notification.show { opacity: 1; pointer-events: auto; }
-        .notification-content { background-color: rgba(30, 24, 18, 0.9); border: 2px solid #c0a062; border-radius: 8px; padding: 30px; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); }
-        .notification-content p { font-family: 'Cinzel', serif; color: #c0a062; font-size: 24px; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); }
-        .notification-btn { padding: 10px 25px; background-color: #3d2e16; color: #c0a062; border: 1px solid #5a4526; border-radius: 5px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 16px; transition: all 0.3s ease; }
-        .notification-btn:hover { background-color: #5a4526; transform: translateY(-2px); }
+        .game-notification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .game-notification.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .notification-content {
+            background-color: rgba(30, 24, 18, 0.9);
+            border: 2px solid #c0a062;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .notification-content p {
+            font-family: 'Cinzel', serif;
+            color: #c0a062;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        .notification-btn {
+            padding: 10px 25px;
+            background-color: #3d2e16;
+            color: #c0a062;
+            border: 1px solid #5a4526;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background-color: #5a4526;
+            transform: translateY(-2px);
+        }
+
         /* Estilos para controles deshabilitados */
-        .btn-plus.disabled, .btn-minus.disabled, .btn-send.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-        .cycle-indicator { display: block; width: fit-content; margin: 5px auto 8px auto; font-size: 12px; background-color: #492222; color: #ff9999; padding: 3px 8px; border-radius: 3px; border: 1px solid #6d3636; text-align: center; }
+        .btn-plus.disabled, .btn-minus.disabled, .btn-send.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .cycle-indicator {
+            display: block;
+            width: fit-content;
+            margin: 5px auto 8px auto;
+            font-size: 12px;
+            background-color: #492222;
+            color: #ff9999;
+            padding: 3px 8px;
+            border-radius: 3px;
+            border: 1px solid #6d3636;
+            text-align: center;
+        }
+
         /* Estilos para Fluzo desactivado */
-        .fluzo-disabled { opacity: 0.7; background-color: rgba(20, 20, 20, 0.9); pointer-events: none; }
-        .fluzo-disabled h3 { color: #8a7a58; }
-        /* Responsive */
-        @media (max-width: 600px) { body { background-position: 30% center; padding: 10px; } h1 { font-size: 22px; } .content-wrapper { padding: 10px; margin-bottom: 10px; } .section-container { padding: 15px; margin: 15px auto; } .section-title { font-size: 20px; margin-bottom: 15px; } .game-button { padding: 15px; font-size: 14px; min-height: 60px; } .status-badge { font-size: 10px; padding: 2px 6px; } .resources-flex { gap: 5px; } .resource-block { padding: 8px 5px; } .resource-block h3 { font-size: 14px; margin-bottom: 5px; } .btn-plus, .btn-minus { width: 30px; height: 30px; font-size: 16px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; } .value-display { width: 40px; height: 30px; font-size: 16px; } .btn-send { padding: 5px 8px; font-size: 12px; width: 90%; } .total-display, .global-display { font-size: 12px; } .reset-buttons-container { text-align: center; margin-bottom: 15px; } .reset-button { font-size: 11px; padding: 4px 8px; margin-bottom: 5px; } }
-        @media (max-width: 360px) { .resources-flex { gap: 3px; } .resource-block { padding: 5px 3px; } .btn-plus, .btn-minus { width: 28px; height: 28px; font-size: 14px; margin: 3px auto; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; } .value-display { width: 36px; height: 28px; font-size: 14px; } .btn-send { padding: 4px 6px; font-size: 11px; margin-bottom: 6px; } .total-display, .global-display { font-size: 11px; } }
-        /* Estilos para notificación de victoria */
-        #victory-notification { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
-        #victory-notification.show { opacity: 1; pointer-events: auto; }
-        #victory-notification .notification-content { background-color: rgba(30, 20, 10, 0.95); border: 3px solid #ffd700; border-radius: 8px; padding: 40px; max-width: 500px; text-align: center; box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); animation: victoryPulse 2s infinite alternate; }
-        #victory-notification p { font-family: 'Cinzel', serif; color: #ffd700; font-size: 32px; margin-bottom: 30px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        #victory-notification .notification-btn { padding: 12px 30px; background-color: #443311; color: #ffd700; border: 2px solid #ffd700; border-radius: 5px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 18px; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        #victory-notification .notification-btn:hover { background-color: #664411; transform: translateY(-3px); box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
-        @keyframes victoryPulse { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
-        /* Estilos para el botón de preparación */
-        .prep-button { padding: 5px 12px; background: linear-gradient(145deg, #6a4b2b, #8a6b4b); color: #f0d8a8; border: 1px solid #c0a062; border-radius: 5px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 14px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
-        .prep-button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); background: linear-gradient(145deg, #7a5b3b, #9a7b5b); }
-        /* Estilos para el modal */
-        .prep-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.85); animation: fadeIn 0.3s ease-in; }
-        .prep-modal-content { position: relative; background-color: rgba(30, 24, 18, 0.95); margin: 5% auto; padding: 25px; border: 2px solid #c0a062; border-radius: 8px; width: 90%; max-width: 800px; box-shadow: 0 0 25px rgba(0, 0, 0, 0.7); animation: slideDown 0.4s ease-out; }
-        .prep-modal-content h2 { font-family: 'Cinzel', serif; color: #c0a062; text-align: center; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); }
-        .prep-modal-content img { max-width: 100%; height: auto; display: block; margin: 0 auto; border: 1px solid #5a4526; border-radius: 5px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); }
-        .close-modal { position: absolute; top: 10px; right: 15px; color: #c0a062; font-size: 28px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
-        .close-modal:hover { color: #ffd700; transform: scale(1.2); }
-        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-        @keyframes slideDown { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
-        @media (max-width: 600px) { .prep-button { font-size: 12px; padding: 4px 10px; } .prep-modal-content { width: 95%; padding: 15px; margin: 10% auto; } .prep-modal-content h2 { font-size: 18px; } }
-        /* Estilos adicionales para navegación de imágenes */
-        .image-container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; }
-        .prep-image { max-width: 100%; height: auto; display: none; margin: 0 auto 15px; border: 1px solid #5a4526; border-radius: 5px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); }
-        .prep-image.active { display: block; animation: fadeIn 0.5s ease-in; }
-        .image-navigation { display: flex; justify-content: center; align-items: center; margin-top: 15px; padding: 10px 0; }
-        .nav-button { padding: 8px 15px; background: linear-gradient(145deg, #5a3d1d, #7a5d3d); color: #f0d8a8; border: 1px solid #c0a062; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); margin: 0 15px; }
-        .nav-button:hover { transform: translateY(-2px); background: linear-gradient(145deg, #6a4d2d, #8a6d4d); }
-        .nav-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        #image-counter { font-family: 'EB Garamond', serif; color: #c0a062; font-size: 16px; min-width: 50px; text-align: center; }
+        .fluzo-disabled {
+            opacity: 0.7;
+            background-color: rgba(20, 20, 20, 0.9);
+            pointer-events: none;
+        }
+
+        .fluzo-disabled h3 {
+            color: #8a7a58; /* Color más apagado */
+        }
+
+
+/* Responsive para móviles (ajusta el tamaño pero mantiene la disposición horizontal) */
+        @media (max-width: 600px) {
+            body {
+                background-position: 30% center;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .content-wrapper {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .section-container {
+                padding: 15px;
+                margin: 15px auto;
+            }
+            
+            .section-title {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            
+            .game-button {
+                padding: 15px;
+                font-size: 14px;
+                min-height: 60px;
+            }
+            
+            .status-badge {
+                font-size: 10px;
+                padding: 2px 6px;
+            }
+            
+            .resources-flex {
+                gap: 5px; /* Espacio más pequeño entre columnas */
+            }
+            
+            .resource-block {
+                padding: 8px 5px;
+            }
+            
+            .resource-block h3 {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            .btn-plus, .btn-minus {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+                
+                /* Asegurar que sigue centrado */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .value-display {
+                width: 40px;
+                height: 30px;
+                font-size: 16px;
+            }
+            
+            .btn-send {
+                padding: 5px 8px;
+                font-size: 12px;
+                width: 90%;
+            }
+            
+            .total-display, .global-display {
+                font-size: 12px;
+            }
+            
+            .reset-buttons-container {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            .reset-button {
+                font-size: 11px;
+                padding: 4px 8px;
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* Para pantallas muy pequeñas, reducir aún más pero mantener horizontal */
+        @media (max-width: 360px) {
+            .resources-flex {
+                gap: 3px;
+            }
+            
+            .resource-block {
+                padding: 5px 3px;
+            }
+            
+            .btn-plus, .btn-minus {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+                margin: 3px auto;
+                
+                /* Asegurar que sigue centrado */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .value-display {
+                width: 36px;
+                height: 28px;
+                font-size: 14px;
+            }
+            
+            .btn-send {
+                padding: 4px 6px;
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+            
+            .total-display, .global-display {
+                font-size: 11px;
+            }
+
+            /* Estilo para el botón de Biff cuando está desactivado */
+            .biff-button.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background: linear-gradient(145deg, #a8a8a8, #888888);
+                color: #333333;
+                text-decoration: line-through;
+                border-color: #666666;
+                box-shadow: none;
+                pointer-events: none;
+            }
+
+            .biff-button.disabled:hover {
+                transform: none;
+                box-shadow: none;
+                background: linear-gradient(145deg, #a8a8a8, #888888);
+            }
+
+        }
+
+/* Estilos para la notificación de victoria */
+#victory-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+#victory-notification.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#victory-notification .notification-content {
+    background-color: rgba(30, 20, 10, 0.95);
+    border: 3px solid #ffd700;
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+    animation: victoryPulse 2s infinite alternate;
+}
+
+#victory-notification p {
+    font-family: 'Cinzel', serif;
+    color: #ffd700;
+    font-size: 32px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+#victory-notification .notification-btn {
+    padding: 12px 30px;
+    background-color: #443311;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+#victory-notification .notification-btn:hover {
+    background-color: #664411;
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes victoryPulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.03);
+    }
+}
+
+/* Estilos para el botón de preparación */
+.prep-button {
+    padding: 5px 12px;
+    background: linear-gradient(145deg, #6a4b2b, #8a6b4b);
+    color: #f0d8a8;
+    border: 1px solid #c0a062;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.prep-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(145deg, #7a5b3b, #9a7b5b);
+}
+
+/* Estilos para el modal */
+.prep-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.85);
+    animation: fadeIn 0.3s ease-in;
+}
+
+.prep-modal-content {
+    position: relative;
+    background-color: rgba(30, 24, 18, 0.95);
+    margin: 5% auto;
+    padding: 25px;
+    border: 2px solid #c0a062;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+    animation: slideDown 0.4s ease-out;
+}
+
+.prep-modal-content h2 {
+    font-family: 'Cinzel', serif;
+    color: #c0a062;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.prep-modal-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #5a4526;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #c0a062;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    color: #ffd700;
+    transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes slideDown {
+    from {transform: translateY(-50px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .prep-button {
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+    
+    .prep-modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 10% auto;
+    }
+    
+    .prep-modal-content h2 {
+        font-size: 18px;
+    }
+}
+
+/* Estilos adicionales para navegación de imágenes */
+.image-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.prep-image {
+    max-width: 100%;
+    height: auto;
+    display: none;
+    margin: 0 auto 15px;
+    border: 1px solid #5a4526;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.prep-image.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.image-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    padding: 10px 0;
+}
+
+.nav-button {
+    padding: 8px 15px;
+    background: linear-gradient(145deg, #5a3d1d, #7a5d3d);
+    color: #f0d8a8;
+    border: 1px solid #c0a062;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0 15px;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(145deg, #6a4d2d, #8a6d4d);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#image-counter {
+    font-family: 'EB Garamond', serif;
+    color: #c0a062;
+    font-size: 16px;
+    min-width: 50px;
+    text-align: center;
+}
+
     </style>
 <script>
-    // Variables globales para el estado (¡Obtenidas inicialmente!)
-    let globalTotals = { perdicion: 0, reserva: 0, perdicion_cycle: 1 };
-    let consecuenciasImprevistasCompleted = false;
-    // Variables globales para datos estáticos pasados desde Flask
-    const gameDependencies = {{ GameData.button_dependencies | tojson }};
-    const gameButtonInfo = {{ GameData.button_info | tojson }};
-    // Constantes para la sala y era actuales
-    const CURRENT_ROOM_ID = {{ room.id }};
-    const CURRENT_ERA = "{{ era }}";
-
-    // --- Funciones Auxiliares ---
-
-    function showNotification(message) {
-        let notification = document.getElementById('game-notification');
-        if (!notification) {
-            notification = document.createElement('div');
-            notification.id = 'game-notification';
-            notification.className = 'game-notification';
-            notification.innerHTML = `<div class="notification-content"><p></p><button class="notification-btn">Aceptar</button></div>`;
-            document.body.appendChild(notification);
-            notification.querySelector('.notification-btn').addEventListener('click', closeNotification);
+        // Variables para almacenar los totales globales
+        const globalTotals = {
+            'perdicion': 0,
+            'reserva': 0,
+            'perdicion_cycle': 1
+        };
+        
+        // Función para confirmar el desmarcado de anuncios
+        function confirmDemarking(buttonIdx, isActive) {
+            // Obtener el elemento del botón actual para verificar su estado real
+            const buttonElement = document.querySelector(`#form-button-${buttonIdx} .game-button`);
+            
+            // Verificar si el botón tiene la clase 'active', lo que indica que está marcado
+            const isCurrentlyActive = buttonElement && buttonElement.classList.contains('active');
+            
+            // Solo mostrar confirmación si realmente estamos desmarcando (está activo actualmente)
+            if (isCurrentlyActive) {
+                return confirm(`¿Estás seguro de que deseas desmarcar este anuncio? 
+Si lo haces, todos los anuncios que dependan de éste también se desmarcarán.`);
+            }
+            
+            // Si estamos marcando (no está activo actualmente), no necesitamos confirmación
+            return true;
         }
-        notification.querySelector('p').innerHTML = message; // Usar innerHTML para el span de AHLCG
-        notification.classList.add('show');
+        
+// ========== PERDICIÓN ==========
+// Función para actualizar el valor de perdición en la interfaz
+function updatePerdicionValue(change) {
+    // Verificar si estamos en el ciclo final
+    if (globalTotals['perdicion_cycle'] > 3) {
+        showNotification("El contador de perdición ha completado todos sus ciclos.");
+        return;
+    }
+    
+    const valueElement = document.getElementById('perdicion-value');
+    if (!valueElement) {
+        console.error("Elemento perdicion-value no encontrado");
+        return;
+    }
+    
+    let currentValue = parseInt(valueElement.innerText || '0');
+    currentValue += change;
+    
+    // Permitir valores negativos pero con límite
+    if (currentValue < 0) {
+        // El valor negativo no puede ser menor que el negativo del valor global
+        if (Math.abs(currentValue) > globalTotals['perdicion']) {
+            currentValue = -globalTotals['perdicion'];
+        }
+    }
+    
+    valueElement.innerText = currentValue;
+}
+
+// Función para enviar el valor de perdición al servidor
+function sendPerdicionValue() {
+    // Verificar si estamos en el ciclo final
+    if (globalTotals['perdicion_cycle'] > 3) {
+        showNotification("El contador de perdición ha completado todos sus ciclos.");
+        return;
     }
 
-    function closeNotification() {
-        const notification = document.getElementById('game-notification');
-        if (notification) notification.classList.remove('show');
+    const valueElement = document.getElementById('perdicion-value');
+    if (!valueElement) {
+        console.error("Elemento perdicion-value no encontrado");
+        return;
     }
 
+    const currentValue = parseInt(valueElement.innerText || '0');
+
+    if (currentValue === 0) {
+        return; // No enviar si el valor es cero
+    }
+
+    // Verificar límite para valores negativos
+    if (currentValue < 0) {
+        // Verificar que no se intente reducir más allá de cero en el global
+        if (Math.abs(currentValue) > globalTotals['perdicion']) {
+            // Informar al usuario y limitar el valor al máximo permitido
+            const maxNegative = -globalTotals['perdicion'];
+            showNotification(`No se puede reducir más allá de 0. Valor ajustado a ${maxNegative}.`);
+            
+            // Ajustar el valor al máximo permitido
+            valueElement.innerText = maxNegative.toString();
+            return;
+        }
+    }
+
+    // Resetear el contador a 0
+    valueElement.innerText = '0';
+
+    // Guardamos el ciclo actual antes de enviar
+    const currentCycle = globalTotals['perdicion_cycle'];
+    
+    // Enviar al servidor usando la nueva ruta específica para perdición
+    fetch('/update_perdicion/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: currentValue
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar total local con datos del servidor
+            const totalElement = document.getElementById('perdicion-total');
+            if (totalElement && data.columnTotal !== undefined) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+    
+            // Actualizar total global
+            const globalElement = document.getElementById('perdicion-global');
+            if (globalElement && data.globalTotal !== undefined) {
+                globalTotals['perdicion'] = data.globalTotal;
+                globalElement.innerText = data.globalTotal;
+                
+                // Añadir animación de resaltado
+                globalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    globalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Actualizar el ciclo de perdición si cambió
+            if (data.perdicionCycle !== undefined) {
+                updatePerdicionCycle(data.perdicionCycle);
+            }
+            
+            // Mostrar notificación si existe
+            if (data.notification) {
+                showNotification(data.notification);
+            }
+        } else if (data.error) {
+            // Mostrar error si existe
+            showNotification("Error: " + data.error);
+            // Restaurar el valor en caso de error
+            valueElement.innerText = currentValue.toString();
+        }
+    })
+    .catch(error => {
+        console.error("Error al enviar perdición:", error);
+        showNotification("Error de conexión: No se pudo enviar el valor de perdición");
+        // Restaurar el valor en caso de error
+        valueElement.innerText = currentValue.toString();
+    });
+}
+
+
+// Función para activar/desactivar Fluzo basado en el ciclo de perdición
+function toggleFluzoBasedOnCycle(cycle, isInitialLoad = false) {
+    const fluzoBlock = document.querySelector('.resource-block:nth-child(3)'); // La tercera columna es Fluzo
+    const fluzoBtns = fluzoBlock.querySelectorAll('button');
+    const fluzoValue = fluzoBlock.querySelector('#fluzo-value');
+    
+    if (!fluzoBlock) return;
+    
+    if (cycle === 1) {
+        // Desactivar Fluzo en Plan 1a
+        fluzoBlock.classList.add('fluzo-disabled');
+        fluzoBtns.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('disabled');
+        });
+        if (fluzoValue) {
+            fluzoValue.style.opacity = '0.5';
+        }
+    } else {
+        // Activar Fluzo en otros planes
+        fluzoBlock.classList.remove('fluzo-disabled');
+        fluzoBtns.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('disabled');
+        });
+        if (fluzoValue) {
+            fluzoValue.style.opacity = '1';
+            // Asegurarnos que la caja siempre muestre 0
+            fluzoValue.innerText = '0';
+        }
+        
+        // Si estamos pasando del ciclo 1 al ciclo 2 (no en carga inicial)
+        if (cycle === 2 && !isInitialLoad) {
+            // Valores posibles
+            const possibleValues = [70, 71, 72, 73, 74, 75, 80, 81, 82, 83, 84, 85];
+            
+            // Seleccionar un valor aleatorio
+            const randomValue = possibleValues[Math.floor(Math.random() * possibleValues.length)];
+            
+            // Llamar al servidor para establecer el valor aleatorio
+            setRandomFluzoValue(randomValue);
+        }
+    }
+}
+
+// Función modificada para establecer un valor aleatorio para Fluzo
+function setRandomFluzoValue(newValue) {
+    // No actualizar la caja, solo enviamos al servidor
+    
+    // Enviar el valor al servidor
+    fetch('/set_fluzo_value/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            value: newValue,
+            silent: true  // Indicador para no mostrar notificación
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar solo el total con el valor del servidor
+            const totalElement = document.getElementById('fluzo-total');
+            if (totalElement && data.fluzoTotal !== undefined) {
+                totalElement.innerText = data.fluzoTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Mantener la caja en 0
+            const valueElement = document.getElementById('fluzo-value');
+            if (valueElement) {
+                valueElement.innerText = '0';
+            }
+            
+            // Ya NO mostramos notificación sobre el valor aleatorio
+        } else if (data.error) {
+            // Mostrar error (mantenemos esto para diagnóstico)
+            showNotification("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error al establecer valor aleatorio de fluzo:", error);
+        showNotification("Error de conexión: No se pudo establecer el valor de fluzo");
+    });
+}
+
+// Modificar la función existente updatePerdicionCycle para detectar el cambio de ciclo
+function updatePerdicionCycle(cycle) {
+    // Guardar el ciclo anterior para detectar la transición específica de 2 a 3
+    const previousCycle = globalTotals['perdicion_cycle'];
+    
+    // Actualizar el valor global
+    globalTotals['perdicion_cycle'] = cycle;
+    
+    const cycleIndicator = document.getElementById('perdicion-cycle');
+    if (cycleIndicator) {
+        let cycleText = "";
+        switch(cycle) {
+            case 1:
+                cycleText = "Plan 1a";
+                break;
+            case 2:
+                cycleText = "Plan 1a. Primer avance";
+                break;
+            case 3:
+                cycleText = "Plan 1a. Segundo avance";
+                break;
+            default:
+                cycleText = "->R2";
+                break;
+        }
+        cycleIndicator.textContent = cycleText;
+        
+        // Si estamos en el ciclo 4 (después del tercer ciclo), deshabilitar controles de perdición
+        if (cycle > 3) {
+            disablePerdicionControls();
+        } else {
+            enablePerdicionControls();
+        }
+        
+        // Activar/desactivar Fluzo según el ciclo
+        toggleFluzoBasedOnCycle(cycle);
+        
+        // Detectar la transición específica del ciclo 2 al ciclo 3
+        if (previousCycle === 2 && cycle === 3) {
+            // Cuando cambiamos al "Plan 1a. Segundo avance", ajustar el valor de Fluzo
+            adjustFluzoBasedOnRules();
+        }
+    }
+}
+
+// Nueva función para ajustar el valor de Fluzo según las reglas especificadas
+function adjustFluzoBasedOnRules() {
+    // Obtener el valor actual de Fluzo
+    const fluzoTotalElement = document.getElementById('fluzo-total');
+    if (!fluzoTotalElement) return;
+    
+    const currentFluzoValue = parseInt(fluzoTotalElement.innerText || '0');
+    let newFluzoValue = currentFluzoValue;
+    
+    // Aplicar las reglas de ajuste:
+    if (currentFluzoValue > 86) {
+        newFluzoValue = currentFluzoValue - 10;
+    } else if (currentFluzoValue < 76) {
+        newFluzoValue = currentFluzoValue + 10;
+    } else if (currentFluzoValue >= 80 && currentFluzoValue <= 82) {
+        newFluzoValue = currentFluzoValue - 5;
+    }
+    
+    // Si el valor ha cambiado, actualizarlo en el servidor
+    if (newFluzoValue !== currentFluzoValue) {
+        // Enviar directamente el valor al servidor sin modificar la caja
+        fetch('/set_fluzo_value/{{ room.id }}/{{ era }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                value: newFluzoValue,
+                silent: false  // Ahora mostramos notificación
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error de red: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // El servidor ya enviará la actualización a través de WebSocket
+                // y mostrará la notificación cuando llegue el evento
+                //showNotification("El nivel de Fluzo condensado ha sido alterado");
+            }
+        })
+        .catch(error => {
+            console.error("Error al ajustar valor de fluzo:", error);
+        });
+    }
+}
+
+// ========== RESERVA ==========
+// Función para actualizar el valor de reserva en la interfaz
+function updateReservaValue(change) {
+    const valueElement = document.getElementById('reserva-value');
+    if (!valueElement) {
+        console.error("Elemento reserva-value no encontrado");
+        return;
+    }
+    
+    let currentValue = parseInt(valueElement.innerText || '0');
+    currentValue += change;
+    
+    // Permitir valores negativos pero con límite
+    if (currentValue < 0) {
+        // El valor negativo no puede ser menor que el negativo del valor global
+        if (Math.abs(currentValue) > globalTotals['reserva']) {
+            currentValue = -globalTotals['reserva'];
+        }
+    }
+    
+    valueElement.innerText = currentValue;
+}
+
+// Función para enviar el valor de reserva al servidor
+function sendReservaValue() {
+    const valueElement = document.getElementById('reserva-value');
+    if (!valueElement) {
+        console.error("Elemento reserva-value no encontrado");
+        return;
+    }
+
+    const currentValue = parseInt(valueElement.innerText || '0');
+
+    if (currentValue === 0) {
+        return; // No enviar si el valor es cero
+    }
+
+    // Verificar límite para valores negativos
+    if (currentValue < 0) {
+        // Verificar que no se intente reducir más allá de cero en el global
+        if (Math.abs(currentValue) > globalTotals['reserva']) {
+            // Informar al usuario y limitar el valor al máximo permitido
+            const maxNegative = -globalTotals['reserva'];
+            showNotification(`No se puede reducir más allá de 0. Valor ajustado a ${maxNegative}.`);
+            
+            // Ajustar el valor al máximo permitido
+            valueElement.innerText = maxNegative.toString();
+            return;
+        }
+    }
+
+    // Resetear el contador a 0
+    valueElement.innerText = '0';
+
+    // Enviar al servidor usando la ruta específica para reserva
+    fetch('/update_reserva/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: currentValue
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar total local con datos del servidor
+            const totalElement = document.getElementById('reserva-total');
+            if (totalElement && data.columnTotal !== undefined) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+    
+            // Actualizar total global
+            const globalElement = document.getElementById('reserva-global');
+            if (globalElement && data.globalTotal !== undefined) {
+                globalTotals['reserva'] = data.globalTotal;
+                globalElement.innerText = data.globalTotal;
+                
+                // Añadir animación de resaltado
+                globalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    globalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+        } else if (data.error) {
+            // Mostrar error si existe
+            showNotification("Error: " + data.error);
+            // Restaurar el valor en caso de error
+            valueElement.innerText = currentValue.toString();
+        }
+    })
+    .catch(error => {
+        console.error("Error al enviar reserva:", error);
+        showNotification("Error de conexión: No se pudo enviar el valor de reserva");
+        // Restaurar el valor en caso de error
+        valueElement.innerText = currentValue.toString();
+    });
+}
+
+// ========== FLUZO ==========
+
+// Función para actualizar el valor de Fluzo
+function updateFluzoValue(change) {
+    // Si Consecuencias Imprevistas ya está completado, no permitir cambios
+    if (consecuenciasImprevistasCompleted) {
+        showNotification("Se ha completado Consecuencias Imprevistas. Fluzo condensado está bloqueado.");
+        return;
+    }
+
+    const valueElement = document.getElementById('fluzo-value');
+    if (!valueElement) {
+        console.error("Elemento fluzo-value no encontrado");
+        return;
+    }
+    
+    // Obtener el valor actual y aplicar el cambio
+    let currentValue = parseInt(valueElement.innerText || '0');
+    let newValue = currentValue + change;
+    
+    // Actualizar el valor en pantalla inmediatamente
+    valueElement.innerText = newValue;
+}
+
+// Definir variable global para el estado de Consecuencias Imprevistas
+let consecuenciasImprevistasCompleted = false;
+
+// Función para comprobar el valor de Fluzo - adaptada para valores negativos
+function checkFluzoValue() {
+    // Si Consecuencias Imprevistas ya está completado, no permitir cambios
+    if (consecuenciasImprevistasCompleted) {
+        showNotification("Se ha completado Consecuencias Imprevistas. Fluzo condensado está bloqueado.");
+        return;
+    }
+
+    const valueElement = document.getElementById('fluzo-value');
+    if (!valueElement) {
+        console.error("Elemento fluzo-value no encontrado");
+        return;
+    }
+
+    const currentValue = parseInt(valueElement.innerText || '0');
+    const totalElement = document.getElementById('fluzo-total');
+    const currentTotal = totalElement ? parseInt(totalElement.innerText || '0') : 0;
+    
+    // Reset del valor en la caja después de comprobar
+    const valueToCheck = currentValue;
+    valueElement.innerText = '0';
+    valueElement.classList.remove('negative'); // Quitar clase visual de negativo
+    
+    // Calcular el nuevo total (que ahora puede disminuir si valueToCheck es negativo)
+    const newTotal = currentTotal + valueToCheck;
+    
+    // Asegurarse de que no sea un valor negativo en el total
+    const finalTotal = Math.max(0, newTotal);
+    
+    // Determinar mensaje basado en el valor y el ciclo actual
+    let message = null;
+    if (globalTotals['perdicion_cycle'] === 2) {
+        // Plan 1a. Primer avance (ciclo 2)
+        if (finalTotal < 78) {
+            message = "El valor de fluzo condensado es inferior a la media";
+        } else if (finalTotal > 78) {
+            message = "El valor de fluzo condensado es superior a la media";
+        } else if (finalTotal === 78) {
+            message = "¡Estas en la media! No alteres más tu valor de fluzo condensado, trata de ayudar a otros grupos colocando pistas en la Reserva temporal";
+        }
+    } else if (globalTotals['perdicion_cycle'] === 3) {
+        // Plan 1a. Segundo avance (ciclo 3)
+        if (finalTotal < 81) {
+            message = "El valor de fluzo condensado es inferior a la media";
+        } else if (finalTotal > 81) {
+            message = "El valor de fluzo condensado es superior a la media";
+        } else if (finalTotal === 81) {
+            message = "¡Estas en la media! No alteres más tu valor de fluzo condensado, trata de ayudar a otros grupos colocando pistas en la Reserva temporal";
+        }
+    }
+    
+    // Enviar al servidor con el mensaje correspondiente
+    sendFluzoCheckResult(finalTotal, valueToCheck, message);
+}
+
+
+// Función para enviar el resultado de la comprobación al servidor
+function sendFluzoCheckResult(newTotal, checkedValue, customMessage = null) {
+    fetch('/check_fluzo_value/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            total_value: newTotal,
+            checked_value: checkedValue,
+            custom_message: customMessage
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar el total con el valor del servidor
+            const totalElement = document.getElementById('fluzo-total');
+            if (totalElement && data.fluzoTotal !== undefined) {
+                totalElement.innerText = data.fluzoTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Si hay un mensaje especial, mostrarlo
+            if (data.message) {
+                showNotification(data.message);
+            }
+            
+            // Verificar si se ha completado Consecuencias Imprevistas
+            if (data.consecuenciasCompleted) {
+                consecuenciasImprevistasCompleted = true;
+                disableFluzoControls();
+            }
+        } else if (data.error) {
+            // Mostrar error
+            showNotification("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error al comprobar fluzo:", error);
+        showNotification("Error de conexión: No se pudo comprobar el valor de fluzo");
+    });
+}
+
+// Función para deshabilitar los controles de Fluzo
+function disableFluzoControls() {
+    const fluzoBlock = document.querySelector('.resource-block:nth-child(3)'); // La tercera columna es Fluzo
+    
+    if (!fluzoBlock) return;
+    
+    // Aplicar clase de deshabilitado
+    fluzoBlock.classList.add('fluzo-disabled');
+    
+    // Deshabilitar todos los botones
+    const fluzoBtns = fluzoBlock.querySelectorAll('button');
+    fluzoBtns.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+    });
+    
+    // Ajustar opacidad del valor
+    const fluzoValue = fluzoBlock.querySelector('#fluzo-value');
+    if (fluzoValue) {
+        fluzoValue.style.opacity = '0.5';
+    }
+    
+    // Agregar mensaje de informativo en el bloque
+    const infoMsg = document.createElement('div');
+    infoMsg.className = 'consecuencias-completed';
+    infoMsg.style.color = '#ff9999';
+    infoMsg.style.fontSize = '12px';
+    infoMsg.style.textAlign = 'center';
+    infoMsg.style.marginTop = '5px';
+    infoMsg.textContent = "Consecuencias Imprevistas completado";
+    
+    // Agregar el mensaje solo si no existe ya
+    if (!fluzoBlock.querySelector('.consecuencias-completed')) {
+        fluzoBlock.appendChild(infoMsg);
+    }
+}
+
+
+
+
+// Función mejorada para mostrar una notificación
+function showNotification(message) {
+    // Crear el elemento de notificación si no existe
+    let notification = document.getElementById('game-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'game-notification';
+        notification.className = 'game-notification';
+        
+        // Contenido de la notificación
+        notification.innerHTML = `
+            <div class="notification-content">
+                <p></p>
+                <button class="notification-btn" onclick="closeNotification()">Aceptar</button>
+            </div>
+        `;
+        
+        // Agregar al cuerpo del documento
+        document.body.appendChild(notification);
+    }
+    
+    // Actualizar el mensaje
+    notification.querySelector('p').innerHTML = message;
+    
+    // Hacer que aparezca con una animación
+    notification.classList.add('show');
+}
+
+// Función para cerrar la notificación
+function closeNotification() {
+    const notification = document.getElementById('game-notification');
+    if (notification) {
+        notification.classList.remove('show');
+    }
+}
+        
+// Función para deshabilitar los controles de Perdición
+function disablePerdicionControls() {
+    const perdicionPlus = document.querySelector('[onclick="updatePerdicionValue(1)"]');
+    const perdicionMinus = document.querySelector('[onclick="updatePerdicionValue(-1)"]');
+    const perdicionSend = document.querySelector('[onclick="sendPerdicionValue()"]');
+    
+    if (perdicionPlus) {
+        perdicionPlus.disabled = true;
+        perdicionPlus.classList.add('disabled');
+    }
+    if (perdicionMinus) {
+        perdicionMinus.disabled = true;
+        perdicionMinus.classList.add('disabled');
+    }
+    if (perdicionSend) {
+        perdicionSend.disabled = true;
+        perdicionSend.classList.add('disabled');
+    }
+}
+
+// Función para habilitar los controles de Perdición
+function enablePerdicionControls() {
+    const perdicionPlus = document.querySelector('[onclick="updatePerdicionValue(1)"]');
+    const perdicionMinus = document.querySelector('[onclick="updatePerdicionValue(-1)"]');
+    const perdicionSend = document.querySelector('[onclick="sendPerdicionValue()"]');
+    
+    if (perdicionPlus) {
+        perdicionPlus.disabled = false;
+        perdicionPlus.classList.remove('disabled');
+    }
+    if (perdicionMinus) {
+        perdicionMinus.disabled = false;
+        perdicionMinus.classList.remove('disabled');
+    }
+    if (perdicionSend) {
+        perdicionSend.disabled = false;
+        perdicionSend.classList.remove('disabled');
+    }
+}
+
+// Función actualizada para manejar la desactivación del botón de Biff
+function updateBiffButton(defeats, disableButton = false) {
+    const biffButton = document.getElementById('biff-button');
+    if (!biffButton) return;
+    
+    let text = "";
+    if (defeats === 0) {
+        text = "Sin derrotas";
+    } else if (defeats === 1) {
+        text = "Derrotado 1 vez";
+    } else {
+        text = `Derrotado ${defeats} veces`;
+    }
+    
+    biffButton.textContent = text;
+    
+    // Aplicar animación de resaltado
+    biffButton.classList.add('highlight-animation');
+    
+    // Eliminar la animación después de que termine
+    setTimeout(() => {
+        biffButton.classList.remove('highlight-animation');
+    }, 1000);
+    
+    // Desactivar el botón si es necesario
+    if (disableButton) {
+        biffButton.disabled = true;
+        biffButton.classList.add('disabled');
+        biffButton.style.opacity = '0.5';
+        biffButton.style.cursor = 'not-allowed';
+        biffButton.title = 'Biff Tannen ha sido añadido a la zona de victoria';
+    }
+}
+
+// Función actualizada para derrotar a Biff
+function defeatBiff() {
+    fetch('/biff_defeat/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})  // Enviar un objeto vacío para asegurar formato correcto
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            updateBiffButton(data.defeats, data.disable_button);
+            console.log("Biff ha sido derrotado", data.defeats, "veces");
+            
+            // Mostrar el mensaje de Biff si existe
+            if (data.message) {
+                showNotification(data.message);
+            }
+        } else {
+            console.error("Error al actualizar las derrotas de Biff:", data.error);
+            showNotification("Error: " + (data.error || "No se pudo actualizar las derrotas de Biff"));
+        }
+    })
+    .catch(error => {
+        console.error("Error en la solicitud:", error);
+        showNotification("Error de conexión al actualizar las derrotas de Biff");
+    });
+}
+
+// Función mejorada para resetear los anuncios
+function resetAnnouncements() {
+    if (!confirm("¿Estás seguro de que deseas resetear TODOS los anuncios de esta era?")) {
+        return;
+    }
+    
+    fetch('/reset_announcements/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página inmediatamente para mostrar cambios
+            window.location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Ha ocurrido un error al resetear los anuncios.");
+    });
+}
+
+// Función mejorada para resetear las derrotas de Biff
+function resetBiff() {
+    if (!confirm("¿Estás seguro de que deseas resetear el contador de derrotas de Biff?")) {
+        return;
+    }
+    
+    fetch('/reset_biff/{{ room.id }}/{{ era }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página inmediatamente para mostrar cambios
+            window.location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Ha ocurrido un error al resetear el contador de Biff.");
+    });
+}
+
+// Función mejorada para resetear un contador de columna específico
+function resetColumn(column) {
+    if (!confirm(`¿Estás seguro de que deseas resetear el contador de ${column}?`)) {
+        return;
+    }
+    
+    fetch(`/reset_column/{{ room.id }}/${column}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recargar la página inmediatamente para mostrar cambios
+            window.location.reload();
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert(`Ha ocurrido un error al resetear el contador de ${column}.`);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar Socket.IO
+    const socket = io();
+    
+    // Variables para almacenar el estado actual
+    const currentRoom = {{ room.id }};
+    const currentEra = "{{ era }}";
+    
+    // Unirse a la sala correspondiente
+    socket.emit('join', { room: `room_${currentRoom}` });
+    
+    // Verificar el estado inicial de Fluzo basado en el ciclo de perdición
+    const initialPerdicionCycle = {{ perdicion_cycle }};
+    toggleFluzoBasedOnCycle(initialPerdicionCycle, true); // true indica que es carga inicial
+
+    // Verificar si el botón de Biff ya está desactivado
+    const biffButton = document.getElementById('biff-button');
+    if (biffButton && biffButton.classList.contains('disabled')) {
+        biffButton.disabled = true;
+        biffButton.style.opacity = '0.5';
+        biffButton.style.cursor = 'not-allowed';
+        biffButton.title = 'Biff Tannen ha sido añadido a la zona de victoria';
+    }
+
+    
+    // ========== EVENTOS PARA PERDICIÓN ==========
+    
+    // Evento de actualización de perdición
+    socket.on('perdicion_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            // Actualizar el total local
+            const totalElement = document.getElementById('perdicion-total');
+            if (totalElement) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Actualizar el ciclo si está presente
+            if (data.perdicionCycle) {
+                updatePerdicionCycle(data.perdicionCycle);
+            }
+            
+            // Mostrar notificación si existe
+            if (data.notification) {
+                showNotification(data.notification);
+            }
+        }
+    });
+    
+    // Evento de actualización global de perdición
+    socket.on('global_perdicion_update', function(data) {
+        // Actualizar el total global
+        const globalElement = document.getElementById('perdicion-global');
+        if (globalElement) {
+            globalTotals['perdicion'] = data.globalTotal;
+            globalElement.innerText = data.globalTotal;
+            
+            // Añadir animación de resaltado
+            globalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                globalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+        
+        // Actualizar el ciclo si está presente
+        if (data.perdicionCycle) {
+            updatePerdicionCycle(data.perdicionCycle);
+        }
+        
+        // Mostrar notificación si existe
+        if (data.notification) {
+            showNotification(data.notification);
+        }
+    });
+    
+    // Evento de completado de ciclo de perdición (afecta a todos los clientes)
+    socket.on('perdicion_cycle_completed', function(data) {
+        console.log("¡Se ha completado un ciclo de perdición!", data);
+        
+        // Reiniciar el contador de "perdición" en la interfaz actual
+        const perdicionTotalElement = document.getElementById('perdicion-total');
+        if (perdicionTotalElement) {
+            perdicionTotalElement.innerText = '0';
+            perdicionTotalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                perdicionTotalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+        
+        // Actualizar el ciclo de perdición
+        updatePerdicionCycle(data.perdicionCycle);
+        
+        // Actualizar el contador global a 0
+        const globalElement = document.getElementById('perdicion-global');
+        if (globalElement) {
+            globalTotals['perdicion'] = 0;
+            globalElement.innerText = '0';
+            
+            // Añadir animación de resaltado
+            globalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                globalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+        
+        // Mostrar notificación solo en la era y sala donde se originó el evento
+        if (currentRoom === data.originRoom && currentEra === data.originEra && data.notification) {
+            showNotification(data.notification);
+        }
+        
+        // Si estamos pasando al ciclo 3, mostrar la notificación de Fluzo modificado
+        if (data.perdicionCycle === 3) {
+            showNotification("El nivel de Fluzo condensado ha sido alterado");
+        }
+    });
+    
+    // ========== EVENTOS PARA RESERVA ==========
+    
+    // Evento de actualización de reserva
+    socket.on('reserva_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            // Actualizar el total local
+            const totalElement = document.getElementById('reserva-total');
+            if (totalElement) {
+                totalElement.innerText = data.columnTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+        }
+    });
+    
+    // Evento de actualización global de reserva
+    socket.on('global_reserva_update', function(data) {
+        // Actualizar el total global
+        const globalElement = document.getElementById('reserva-global');
+        if (globalElement) {
+            globalTotals['reserva'] = data.globalTotal;
+            globalElement.innerText = data.globalTotal;
+            
+            // Añadir animación de resaltado
+            globalElement.classList.add('highlight-animation');
+            
+            // Eliminar la animación después de que termine
+            setTimeout(() => {
+                globalElement.classList.remove('highlight-animation');
+            }, 1000);
+        }
+    });
+    
+    // ========== EVENTOS PARA FLUZO ==========
+    
+    // Evento de actualización de fluzo
+    socket.on('fluzo_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            console.log("Recibido evento de actualización de fluzo", data);
+            
+            // Actualizar el valor en pantalla (la caja)
+            const valueElement = document.getElementById('fluzo-value');
+            if (valueElement && data.fluzoValue !== undefined) {
+                valueElement.innerText = data.fluzoValue;
+            }
+            
+            // Actualizar el total acumulado
+            const totalElement = document.getElementById('fluzo-total');
+            if (totalElement && data.fluzoTotal !== undefined) {
+                totalElement.innerText = data.fluzoTotal;
+                
+                // Añadir animación de resaltado
+                totalElement.classList.add('highlight-animation');
+                
+                // Eliminar la animación después de que termine
+                setTimeout(() => {
+                    totalElement.classList.remove('highlight-animation');
+                }, 1000);
+            }
+            
+            // Verificar el estado de Consecuencias Imprevistas
+            if (data.consecuenciasCompleted) {
+                consecuenciasImprevistasCompleted = true;
+                disableFluzoControls();
+            }
+            
+            // Si hay un mensaje y NO estamos en modo silencioso, mostrarlo
+            if (data.message && !data.silent) {
+                showNotification(data.message);
+            }
+            // Si es un valor aleatorio, NO mostrar la notificación si está marcado como silencioso
+            else if (data.isRandomValue && !data.silent) {
+                //showNotification(`¡La energía de Fluzo condensado se ha estabilizado en ${data.fluzoTotal}!`);
+            }
+        }
+    });
+    
+    // ========== EVENTOS PARA CONSECUENCIAS IMPREVISTAS ==========
+    
+    // Evento cuando se completa Consecuencias Imprevistas (se enviará a todos los clientes)
+    socket.on('consecuencias_imprevistas_completed', function(data) {
+        console.log("Recibido evento de Consecuencias Imprevistas completado", data);
+        
+        // Actualizar el estado global
+        consecuenciasImprevistasCompleted = true;
+        
+        // Deshabilitar controles de Fluzo
+        disableFluzoControls();
+        
+        // Mostrar notificación
+        if (data.message) {
+            showNotification(data.message);
+        }
+    });
+
+    // ========== OTROS EVENTOS ==========
+    
+    // Escuchar eventos de reinicio del servidor
+    socket.on('server_reset', function(data) {
+        alert(data.message);
+        window.location.reload();
+    });
+    
+    // Escuchar eventos de actualización de botones
+    socket.on('button_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala
+        if (data.room_id === currentRoom) {
+            console.log("Recibido evento de actualización de botones", data);
+            
+            // Si estamos en la misma era del botón que cambió, actualizamos la UI
+            if (currentEra === data.era) {
+                // Actualizar el estado del botón que cambió
+                const buttonForm = document.getElementById(`form-button-${data.button_idx}`);
+                if (buttonForm) {
+                    const buttonElement = buttonForm.querySelector('button');
+                    if (data.is_activating) {
+                        // Si se está activando
+                        buttonElement.classList.add('active');
+                        if (!buttonElement.querySelector('.status-badge')) {
+                            // Agregar la etiqueta de "Completado" si no existe
+                            const badge = document.createElement('span');
+                            badge.className = 'status-badge';
+                            badge.textContent = 'Completado';
+                            buttonElement.appendChild(badge);
+                        }
+                    } else {
+                        // Si se está desactivando
+                        buttonElement.classList.remove('active');
+                        const badge = buttonElement.querySelector('.status-badge');
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                }
+            }
+            
+            // Actualizar el estado de todos los botones según las dependencias
+            // para reflejar qué botones están disponibles
+            for (const era in data.available_buttons) {
+                if (era === currentEra) {
+                    // Actualizar los botones de la era actual
+                    data.available_buttons[era].forEach((isAvailable, idx) => {
+                        const buttonForm = document.getElementById(`form-button-${idx}`);
+                        if (buttonForm) {
+                            const buttonElement = buttonForm.querySelector('button');
+                            
+                            // Primero eliminamos todas las clases de estado
+                            buttonElement.classList.remove('available', 'disabled');
+                            
+                            // Verificar si está activo según el progress actualizado
+                            const isActive = data.progress[era][idx];
+                            
+                            if (isActive) {
+                                buttonElement.classList.add('active');
+                                if (!buttonElement.querySelector('.status-badge')) {
+                                    const badge = document.createElement('span');
+                                    badge.className = 'status-badge';
+                                    badge.textContent = 'Completado';
+                                    buttonElement.appendChild(badge);
+                                }
+                            } else {
+                                buttonElement.classList.remove('active');
+                                const badge = buttonElement.querySelector('.status-badge');
+                                if (badge) {
+                                    badge.remove();
+                                }
+                                
+                                // Si no está activo, determinar si está disponible o deshabilitado
+                                if (isAvailable) {
+                                    buttonElement.classList.add('available');
+                                    buttonElement.disabled = false;
+                                } else {
+                                    buttonElement.classList.add('disabled');
+                                    buttonElement.disabled = true;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+    
+    // Escuchar eventos de actualización de Biff
+        socket.on('biff_update', function(data) {
+        // Verificar que la actualización sea para nuestra sala y era
+        if (data.room_id === currentRoom && data.era === currentEra) {
+            updateBiffButton(data.defeats, data.disable_button);
+        
+            // Mostrar el mensaje de Biff si existe
+            if (data.message) {
+                showNotification(data.message);
+            }
+        }
+    });
+    
+    // ========== CARGA INICIAL DE DATOS ==========
+    
+    // Obtener datos iniciales de columnas del servidor cuando se carga la página
+    fetch('/get_column_totals/' + currentRoom + '/' + currentEra, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error de red: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Actualizar totales de columnas con datos del servidor
+            if (data.columnTotals) {
+                // Actualizar perdición
+                const perdicionTotalElement = document.getElementById('perdicion-total');
+                if (perdicionTotalElement && data.columnTotals.perdicion !== undefined) {
+                    perdicionTotalElement.innerText = data.columnTotals.perdicion;
+                }
+                
+                // Actualizar reserva
+                const reservaTotalElement = document.getElementById('reserva-total');
+                if (reservaTotalElement && data.columnTotals.reserva !== undefined) {
+                    reservaTotalElement.innerText = data.columnTotals.reserva;
+                }
+                
+                // Actualizar fluzo si existe
+                const fluzoTotalElement = document.getElementById('fluzo-total');
+                if (fluzoTotalElement && data.columnTotals.fluzo !== undefined) {
+                    fluzoTotalElement.innerText = data.columnTotals.fluzo;
+                }
+            }
+            
+            // Actualizar los contadores globales
+            if (data.globalTotals) {
+                // Actualizar perdición global
+                const perdicionGlobalElement = document.getElementById('perdicion-global');
+                if (perdicionGlobalElement && data.globalTotals.perdicion !== undefined) {
+                    globalTotals['perdicion'] = data.globalTotals.perdicion;
+                    perdicionGlobalElement.innerText = data.globalTotals.perdicion;
+                }
+                
+                // Actualizar reserva global
+                const reservaGlobalElement = document.getElementById('reserva-global');
+                if (reservaGlobalElement && data.globalTotals.reserva !== undefined) {
+                    globalTotals['reserva'] = data.globalTotals.reserva;
+                    reservaGlobalElement.innerText = data.globalTotals.reserva;
+                }
+                
+                // Actualizar ciclo de perdición
+                if (data.globalTotals.perdicion_cycle !== undefined) {
+                    globalTotals['perdicion_cycle'] = data.globalTotals.perdicion_cycle;
+                    updatePerdicionCycle(data.globalTotals.perdicion_cycle);
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error("Error al obtener totales de columna:", error);
+    });
+
+    // Verificar si Consecuencias Imprevistas ya está completado
+    function checkConsecuenciasImprevistasStatus() {
+        fetch('/get_global_counters', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error de red: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.globalTotals) {
+                // Actualizar el estado de Consecuencias Imprevistas
+                if (data.globalTotals.consecuencias_imprevistas) {
+                    consecuenciasImprevistasCompleted = true;
+                    disableFluzoControls();
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error al obtener estado de Consecuencias Imprevistas:", error);
+        });
+    }
+    
+    // Verificar el estado de Consecuencias Imprevistas al cargar la página
+    checkConsecuenciasImprevistasStatus();
+    
+    // Verificar si estamos en el ciclo 4 (después del tercer ciclo) al cargar
+    const perdicionCycle = {{ perdicion_cycle }};
+    if (perdicionCycle > 3) {
+        disablePerdicionControls();
+    }
+
+    // ========== EVENTOS PARA LAS CONDICIONES DE VICTORIA ==========
+    
+    // Escuchar el evento de condiciones de victoria cumplidas
+    socket.on('victory_conditions_met', function(data) {
+        console.log("¡Se han cumplido las condiciones de victoria!", data);
+        
+        // Mostrar notificación especial
+        if (data.message) {
+            // Crear un estilo especial para la notificación de victoria
+            const victoryNotification = document.createElement('div');
+            victoryNotification.id = 'victory-notification';
+            victoryNotification.className = 'game-notification show';
+            victoryNotification.style.zIndex = '2000'; // Mayor que la notificación normal
+            
+            // Contenido de la notificación con estilo especial
+            victoryNotification.innerHTML = `
+                <div class="notification-content" style="background-color: rgba(30, 20, 10, 0.95); border: 3px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);">
+                    <p style="color: #ffd700; font-size: 32px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">${data.message}</p>
+                    <button class="notification-btn" style="background-color: #443311; color: #ffd700; border-color: #ffd700; font-size: 18px;" onclick="closeVictoryNotification()">¡Entendido!</button>
+                </div>
+            `;
+            
+            // Agregar al cuerpo del documento, reemplazando cualquier notificación de victoria existente
+            const existingVictory = document.getElementById('victory-notification');
+            if (existingVictory) {
+                existingVictory.remove();
+            }
+            document.body.appendChild(victoryNotification);
+            
+            // Añadir vibraciones sutiles a la notificación para llamar más la atención
+            animateVictoryNotification();
+        }
+    });
+    
+    // Función para animar la notificación de victoria
+    function animateVictoryNotification() {
+        const notification = document.getElementById('victory-notification');
+        if (!notification) return;
+        
+        const content = notification.querySelector('.notification-content');
+        if (!content) return;
+        
+        // Crear el efecto de brillo radiante
+        content.style.transition = 'box-shadow 1s ease-in-out';
+        
+        let glowIntensity = 0;
+        let growing = true;
+        
+        const glowAnimation = setInterval(() => {
+            if (growing) {
+                glowIntensity += 2;
+                if (glowIntensity >= 40) growing = false;
+            } else {
+                glowIntensity -= 2;
+                if (glowIntensity <= 10) growing = true;
+            }
+            
+            content.style.boxShadow = `0 0 ${glowIntensity}px rgba(255, 215, 0, 0.8)`;
+            
+            // Verificar si la notificación sigue existiendo
+            if (!document.getElementById('victory-notification')) {
+                clearInterval(glowAnimation);
+            }
+        }, 100);
+    }
+    
+    // Función para cerrar la notificación de victoria
     function closeVictoryNotification() {
         const notification = document.getElementById('victory-notification');
         if (notification) {
             notification.classList.remove('show');
-            setTimeout(() => { if (notification.parentNode) notification.parentNode.removeChild(notification); }, 300);
-        }
-    }
-
-    function animateVictoryNotification() {
-        const notification = document.getElementById('victory-notification');
-        if (!notification) return;
-        const content = notification.querySelector('.notification-content');
-        if (!content) return;
-        content.style.transition = 'box-shadow 1s ease-in-out';
-        let glowIntensity = 0, growing = true;
-        const glowAnimation = setInterval(() => {
-            if (!document.getElementById('victory-notification')) { clearInterval(glowAnimation); return; }
-            glowIntensity += growing ? 2 : -2;
-            if (glowIntensity >= 40) growing = false; else if (glowIntensity <= 10) growing = true;
-            content.style.boxShadow = `0 0 ${glowIntensity}px rgba(255, 215, 0, 0.8)`;
-        }, 100);
-    }
-
-    // --- Lógica de Contadores ---
-
-    function updateCounterValue(type, change) {
-        if (type === 'perdicion' && globalTotals.perdicion_cycle > 3) {
-            showNotification("Contador de perdición completado."); return;
-        }
-        if (type === 'fluzo' && consecuenciasImprevistasCompleted) {
-             showNotification("Consecuencias Imprevistas completado. Fluzo bloqueado."); return;
-        }
-
-        const valueEl = document.getElementById(`${type}-value`);
-        if (!valueEl) { console.error(`Elemento ${type}-value no encontrado`); return; }
-
-        let currentVal = parseInt(valueEl.innerText || '0');
-        let newVal = currentVal + change;
-
-        // Limitar valores negativos basados en el total global correspondiente
-        if (newVal < 0 && (type === 'perdicion' || type === 'reserva')) {
-            const globalTotal = globalTotals[type];
-            if (Math.abs(newVal) > globalTotal) {
-                newVal = -globalTotal;
-            }
-        }
-        // Fluzo no puede ser negativo en la caja temporal
-        if (type === 'fluzo' && newVal < 0) {
-            newVal = 0;
-        }
-
-        valueEl.innerText = newVal;
-    }
-
-    function sendCounterValue(type) {
-        const endpointMap = { perdicion: 'update_perdicion', reserva: 'update_reserva', fluzo: 'check_fluzo_value' };
-        if (!endpointMap[type]) return;
-
-        if (type === 'perdicion' && globalTotals.perdicion_cycle > 3) { showNotification("Contador de perdición completado."); return; }
-        if (type === 'fluzo' && consecuenciasImprevistasCompleted) { showNotification("Fluzo bloqueado."); return; }
-
-        const valueEl = document.getElementById(`${type}-value`);
-        if (!valueEl) { console.error(`Elemento ${type}-value no encontrado`); return; }
-        const valueToSend = parseInt(valueEl.innerText || '0');
-
-        if (valueToSend === 0 && type !== 'fluzo') return; // No enviar 0 excepto para fluzo (check)
-
-        // Validar negativos antes de enviar
-        if (valueToSend < 0 && (type === 'perdicion' || type === 'reserva')) {
-            const globalTotal = globalTotals[type];
-            if (Math.abs(valueToSend) > globalTotal) {
-                const maxNegative = -globalTotal;
-                showNotification(`No se puede reducir más allá de 0. Valor ajustado a ${maxNegative}.`);
-                valueEl.innerText = maxNegative.toString(); // Corregir UI y no enviar
-                return;
-            }
-        }
-
-        // Resetear caja (excepto para fluzo, que se resetea después del check)
-        if (type !== 'fluzo') valueEl.innerText = '0';
-
-        let payload = { amount: valueToSend };
-        // Payload especial para check_fluzo_value
-        if (type === 'fluzo') {
-            const totalEl = document.getElementById('fluzo-total');
-            const currentTotal = totalEl ? parseInt(totalEl.innerText || '0') : 0;
-            const newCalculatedTotal = Math.max(0, currentTotal + valueToSend); // Calcular nuevo total (>=0)
-             // Determinar mensaje basado en el valor y el ciclo actual
-            let message = null;
-            if (globalTotals.perdicion_cycle === 2) { // Plan 1a, avance 1
-                if (newCalculatedTotal < 78) message = "Valor de fluzo inferior a la media";
-                else if (newCalculatedTotal > 78) message = "Valor de fluzo superior a la media";
-                else message = "¡Estas en la media! Ayuda a otros...";
-            } else if (globalTotals.perdicion_cycle === 3) { // Plan 1a, avance 2
-                if (newCalculatedTotal < 81) message = "Valor de fluzo inferior a la media";
-                else if (newCalculatedTotal > 81) message = "Valor de fluzo superior a la media";
-                else message = "¡Estas en la media! Ayuda a otros...";
-            }
-
-            payload = {
-                total_value: newCalculatedTotal, // Enviar el *nuevo* total calculado
-                checked_value: valueToSend,      // Enviar el valor introducido
-                custom_message: message          // Enviar mensaje auto-generado
-            };
-             // Resetear caja de fluzo ahora
-             valueEl.innerText = '0';
-        }
-
-        fetch(`/${endpointMap[type]}/${CURRENT_ROOM_ID}/${CURRENT_ERA}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.ok ? response.json() : response.json().then(err => { throw new Error(err.error || `Error ${response.status}`) }))
-        .then(data => {
-            if (!data.success) {
-                showNotification(`Error ${type}: ${data.error}`);
-                // Restaurar valor si falló (excepto fluzo que ya se reseteó)
-                if (type !== 'fluzo') valueEl.innerText = valueToSend.toString();
-            } else {
-                 // Éxito: La UI se actualizará vía Socket.IO, no es necesario hacer nada aquí
-                 // excepto manejar notificaciones específicas de la respuesta si las hubiera
-                 if (data.notification && type === 'perdicion') showNotification(data.notification);
-                 if (data.message && type === 'fluzo') showNotification(data.message);
-                 if (data.consecuenciasCompleted && type === 'fluzo') {
-                     consecuenciasImprevistasCompleted = true;
-                     disableFluzoControls();
-                 }
-            }
-        })
-        .catch(error => {
-            console.error(`Error enviando ${type}:`, error);
-            showNotification(`Error de conexión (${type})`);
-            if (type !== 'fluzo') valueEl.innerText = valueToSend.toString(); // Restaurar
-        });
-    }
-
-    // --- Lógica de Anuncios ---
-
-    function confirmDemarking(buttonElement, isActive) {
-        if (isActive) {
-            const buttonText = (buttonElement.querySelector('div')?.textContent || 'este anuncio').trim().replace(/\s+/g, ' ');
-            return confirm(`¿Desmarcar "${buttonText}"?\nLos anuncios dependientes también se desmarcarán.`);
-        }
-        return true;
-    }
-
-    function toggleAnnouncementButton(buttonElement) {
-        const roomId = buttonElement.dataset.roomId;
-        const era = buttonElement.dataset.era;
-        const buttonIdx = buttonElement.dataset.buttonIdx;
-        const isActive = buttonElement.classList.contains('active');
-
-        if (!confirmDemarking(buttonElement, isActive)) return;
-
-        fetch(`/toggle_button/${roomId}/${era}/${buttonIdx}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.ok ? response.json() : response.json().then(err => { throw new Error(err.error || `Error ${response.status}`) }))
-        .then(data => {
-            if (!data.success) showNotification(`Error botón: ${data.error}`);
-            // La actualización visual vendrá por Socket.IO
-        })
-        .catch(error => {
-            console.error("Error fetch toggle:", error);
-            showNotification(`Error: ${error.message}`);
-        });
-    }
-
-     // Función JS para calcular disponibilidad de botones
-     function get_available_buttons_client(progress) {
-         const availableButtons = {};
-         for (const era_loop in gameButtonInfo) {
-             availableButtons[era_loop] = [];
-             const progressEra = progress?.[era_loop] ?? [];
-             const dependenciesEra = gameDependencies?.[era_loop] ?? {};
-             const num_buttons = gameButtonInfo[era_loop]?.length ?? 0;
-
-             for (let i = 0; i < num_buttons; i++) {
-                 let is_available = true;
-                 const buttonDeps = dependenciesEra[i] || [];
-                 for (const dep of buttonDeps) {
-                     try {
-                         const [dep_era, dep_idx_str] = dep.split('-');
-                         const dep_idx = parseInt(dep_idx_str, 10);
-                         if (!(progress?.[dep_era]?.[dep_idx] === true)) { // Verificar explícitamente true
-                             is_available = false;
-                             break;
-                         }
-                     } catch (e) {
-                         is_available = false;
-                         console.warn("Error procesando dependencia:", dep);
-                         break;
-                     }
-                 }
-                 availableButtons[era_loop].push(is_available);
-             }
-             // Asegurar longitud correcta si progress era más corto
-              if (availableButtons[era_loop].length < num_buttons) {
-                    availableButtons[era_loop].push(...Array(num_buttons - availableButtons[era_loop].length).fill(false));
-              }
-         }
-         return availableButtons;
-     }
-
-     // Función para actualizar la UI de los botones
-     function updateButtonsUI(progressData) {
-         if (!progressData) return;
-         const availableButtons = get_available_buttons_client(progressData);
-
-         for (const era in progressData) {
-             if (era === CURRENT_ERA) { // Solo era actual
-                 progressData[era].forEach((isActive, idx) => {
-                     const buttonElement = document.getElementById(`game-button-${idx}`);
-                     if (buttonElement) {
-                         const badge = buttonElement.querySelector('.status-badge');
-                         const isAvailable = availableButtons[era]?.[idx] ?? false;
-
-                         buttonElement.classList.remove('active', 'available', 'disabled');
-                         buttonElement.disabled = false; // Reset disable
-
-                         if (isActive) {
-                             buttonElement.classList.add('active');
-                             if (!badge) {
-                                 const newBadge = document.createElement('span');
-                                 newBadge.className = 'status-badge';
-                                 newBadge.textContent = 'Completado';
-                                 buttonElement.appendChild(newBadge);
-                             }
-                         } else {
-                             if (badge) badge.remove();
-                             if (isAvailable) {
-                                 buttonElement.classList.add('available');
-                             } else {
-                                 buttonElement.classList.add('disabled');
-                                 buttonElement.disabled = true;
-                             }
-                         }
-                     }
-                 });
-             }
-         }
-     }
-
-    // --- Lógica de Biff ---
-
-    function updateBiffButtonUI(defeats, disableButton) {
-        const biffButton = document.getElementById('biff-button');
-        if (!biffButton) return;
-        biffButton.textContent = defeats === 0 ? "Sin derrotas" : (defeats === 1 ? "Derrotado 1 vez" : `Derrotado ${defeats} veces`);
-        biffButton.classList.remove('highlight-animation'); // Quitar animación anterior
-        void biffButton.offsetWidth; // Forzar reflow para reiniciar animación
-        biffButton.classList.add('highlight-animation');
-        setTimeout(() => biffButton.classList.remove('highlight-animation'), 1000);
-
-        biffButton.disabled = disableButton;
-        biffButton.classList.toggle('disabled', disableButton);
-        biffButton.title = disableButton ? 'Biff Tannen ya está en la zona de victoria' : '';
-        biffButton.style.opacity = disableButton ? '0.5' : '';
-        biffButton.style.cursor = disableButton ? 'not-allowed' : '';
-    }
-
-    function defeatBiff() {
-        const biffButton = document.getElementById('biff-button');
-        if (biffButton && biffButton.disabled) return; // No hacer nada si ya está deshabilitado
-
-        fetch(`/biff_defeat/${CURRENT_ROOM_ID}/${CURRENT_ERA}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
-        })
-        .then(response => response.ok ? response.json() : response.json().then(err => { throw new Error(err.error || `Error ${response.status}`) }))
-        .then(data => {
-            if (data.success) {
-                 // La UI se actualiza vía Socket.IO
-                 if (data.message) showNotification(data.message);
-            } else {
-                 showNotification(`Error Biff: ${data.error}`);
-            }
-        })
-        .catch(error => {
-            console.error("Error fetch defeatBiff:", error);
-            showNotification(`Error: ${error.message}`);
-        });
-    }
-
-    // --- Lógica de Resets (Admin) ---
-
-    function resetAnnouncements() {
-        if (!confirm("¿Resetear TODOS los anuncios de esta era?")) return;
-        fetch(`/reset_announcements/${CURRENT_ROOM_ID}/${CURRENT_ERA}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }})
-            .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.error) }))
-            .then(data => { if (data.success) window.location.reload(); else alert(`Error: ${data.error}`); })
-            .catch(err => alert(`Error reset anuncios: ${err.message}`));
-    }
-
-    function resetBiff() {
-        if (!confirm("¿Resetear contador de Biff?")) return;
-        fetch(`/reset_biff/${CURRENT_ROOM_ID}/${CURRENT_ERA}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }})
-            .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.error) }))
-            .then(data => { if (data.success) window.location.reload(); else alert(`Error: ${data.error}`); })
-            .catch(err => alert(`Error reset Biff: ${err.message}`));
-    }
-
-    function resetColumn(column) {
-        if (!confirm(`¿Resetear contador de ${column}?`)) return;
-        fetch(`/reset_column/${CURRENT_ROOM_ID}/${column}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }})
-            .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.error) }))
-            .then(data => { if (data.success) window.location.reload(); else alert(`Error: ${data.error}`); })
-            .catch(err => alert(`Error reset ${column}: ${err.message}`));
-    }
-
-    // --- Lógica del Modal de Preparación ---
-    function setupPrepModal() {
-        const prepModal = document.getElementById('prep-modal');
-        const prepButton = document.getElementById('prep-button');
-        const closeModalBtn = prepModal?.querySelector('.close-modal');
-        const prevButton = document.getElementById('prev-image');
-        const nextButton = document.getElementById('next-image');
-        const imageCounter = document.getElementById('image-counter');
-        let prepImages = prepModal?.querySelectorAll('.prep-image') ?? [];
-        let currentImageIndex = 0;
-
-        function updateImage() {
-            const totalImages = prepImages.length;
-            prepImages.forEach((img, idx) => img.classList.toggle('active', idx === currentImageIndex));
-            if (imageCounter) imageCounter.textContent = `${currentImageIndex + 1} / ${totalImages}`;
-            if (prevButton) prevButton.disabled = currentImageIndex === 0;
-            if (nextButton) nextButton.disabled = currentImageIndex >= totalImages - 1;
-        }
-
-        if (prepButton) {
-            prepButton.onclick = () => {
-                prepImages = prepModal?.querySelectorAll('.prep-image') ?? []; // Re-seleccionar por si acaso
-                currentImageIndex = 0;
-                updateImage();
-                prepModal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            };
-        }
-        if (closeModalBtn) closeModalBtn.onclick = () => { prepModal.style.display = 'none'; document.body.style.overflow = 'auto'; };
-        if (prevButton) prevButton.onclick = () => { if (currentImageIndex > 0) { currentImageIndex--; updateImage(); } };
-        if (nextButton) nextButton.onclick = () => { if (currentImageIndex < prepImages.length - 1) { currentImageIndex++; updateImage(); } };
-        window.onclick = (event) => { if (event.target === prepModal) { prepModal.style.display = 'none'; document.body.style.overflow = 'auto'; } };
-        window.onkeydown = (event) => {
-            if (prepModal?.style.display === 'block') {
-                if (event.key === 'Escape') closeModalBtn.click();
-                else if (event.key === 'ArrowLeft') prevButton.click();
-                else if (event.key === 'ArrowRight') nextButton.click();
-            }
-        };
-    }
-
-    // --- Inicialización y Listeners Socket.IO ---
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const socket = io();
-
-        socket.on('connect', () => {
-            console.log('Socket.IO conectado');
-            socket.emit('join', { room: `room_${CURRENT_ROOM_ID}` });
-        });
-        socket.on('disconnect', () => console.log('Socket.IO desconectado'));
-        socket.on('connect_error', (err) => console.error('Error conexión Socket.IO:', err));
-
-        // Inicializar controles y modal
-        setupPrepModal();
-        checkInitialStatus(); // Cargar estado inicial (perdicion, fluzo, etc.)
-
-        // -- Listeners de Socket.IO para Actualizaciones --
-
-        socket.on('button_update', data => {
-            if (data.room_id === CURRENT_ROOM_ID) {
-                console.log("Socket.IO: button_update", data);
-                updateButtonsUI(data.progress);
-            }
-        });
-
-        socket.on('biff_update', data => {
-            if (data.room_id === CURRENT_ROOM_ID && data.era === CURRENT_ERA) {
-                console.log("Socket.IO: biff_update", data);
-                updateBiffButtonUI(data.defeats, data.disable_button);
-                if (data.message) showNotification(data.message);
-            }
-        });
-
-        socket.on('perdicion_update', data => {
-            if (data.room_id === CURRENT_ROOM_ID && data.era === CURRENT_ERA) {
-                console.log("Socket.IO: perdicion_update", data);
-                updateCounterUI('perdicion', 'total', data.columnTotal);
-                if(data.perdicionCycle !== undefined) updatePerdicionCycle(data.perdicionCycle);
-                if (data.notification) showNotification(data.notification);
-            }
-        });
-         socket.on('global_perdicion_update', data => {
-            console.log("Socket.IO: global_perdicion_update", data);
-            updateCounterUI('perdicion', 'global', data.globalTotal);
-            globalTotals.perdicion = data.globalTotal ?? globalTotals.perdicion; // Actualizar caché global
-             if(data.perdicionCycle !== undefined) updatePerdicionCycle(data.perdicionCycle);
-             // Notificación manejada por perdicion_cycle_completed si aplica
-        });
-
-        socket.on('reserva_update', data => {
-            if (data.room_id === CURRENT_ROOM_ID && data.era === CURRENT_ERA) {
-                console.log("Socket.IO: reserva_update", data);
-                updateCounterUI('reserva', 'total', data.columnTotal);
-            }
-        });
-        socket.on('global_reserva_update', data => {
-            console.log("Socket.IO: global_reserva_update", data);
-            updateCounterUI('reserva', 'global', data.globalTotal);
-            globalTotals.reserva = data.globalTotal ?? globalTotals.reserva; // Actualizar caché global
-        });
-
-        socket.on('fluzo_update', data => {
-            if (data.room_id === CURRENT_ROOM_ID && data.era === CURRENT_ERA) {
-                console.log("Socket.IO: fluzo_update", data);
-                updateCounterUI('fluzo', 'total', data.fluzoTotal);
-                // La caja 'fluzo-value' debería permanecer en 0 (o resetearse a 0 aquí si es necesario)
-                 const valueEl = document.getElementById('fluzo-value');
-                 if (valueEl) valueEl.innerText = '0';
-
-                if (data.consecuenciasCompleted) {
-                    consecuenciasImprevistasCompleted = true;
-                    disableFluzoControls();
+            // Remover después de la animación
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
                 }
-                 // Mostrar mensaje si NO es silencioso
-                if (data.message && !data.silent) showNotification(data.message);
+            }, 300);
+        }
+    }
+
+    // ========== MODAL DE PREPARACIÓN CON NAVEGACIÓN DE IMÁGENES ==========
+    
+    // Elementos del DOM
+    const prepModal = document.getElementById('prep-modal');
+    const prepButton = document.getElementById('prep-button');
+    const closeModal = document.querySelector('.close-modal');
+    const prevButton = document.getElementById('prev-image');
+    const nextButton = document.getElementById('next-image');
+    const imageCounter = document.getElementById('image-counter');
+    
+    // Variables para la navegación
+    let currentImageIndex = 0;
+    let prepImages = [];
+    
+    // Función para inicializar las imágenes y contadores
+    function initializeImageNavigation() {
+        // Seleccionar todas las imágenes disponibles
+        prepImages = document.querySelectorAll('.prep-image');
+        const totalImages = prepImages.length;
+        
+        // Actualizar el contador inicial
+        if (imageCounter) {
+            imageCounter.textContent = `1 / ${totalImages}`;
+        }
+        
+        // Deshabilitar el botón anterior inicialmente (estamos en la primera imagen)
+        if (prevButton) {
+            prevButton.disabled = true;
+        }
+        
+        // Deshabilitar el botón siguiente si solo hay una imagen
+        if (nextButton) {
+            nextButton.disabled = totalImages <= 1;
+        }
+    }
+    
+    // Función para actualizar la imagen visible
+    function updateImage() {
+        const totalImages = prepImages.length;
+        
+        // Ocultar todas las imágenes
+        prepImages.forEach(img => img.classList.remove('active'));
+        
+        // Mostrar la imagen actual
+        if (prepImages[currentImageIndex]) {
+            prepImages[currentImageIndex].classList.add('active');
+        }
+        
+        // Actualizar el contador
+        if (imageCounter) {
+            imageCounter.textContent = `${currentImageIndex + 1} / ${totalImages}`;
+        }
+        
+        // Habilitar/deshabilitar botones según la posición
+        if (prevButton) {
+            prevButton.disabled = currentImageIndex === 0;
+        }
+        if (nextButton) {
+            nextButton.disabled = currentImageIndex === totalImages - 1;
+        }
+    }
+    
+    // Evento para imagen anterior
+    if (prevButton) {
+        prevButton.addEventListener('click', function() {
+            if (currentImageIndex > 0) {
+                currentImageIndex--;
+                updateImage();
             }
         });
-
-        socket.on('perdicion_cycle_completed', data => {
-            console.log("Socket.IO: perdicion_cycle_completed", data);
-            // Resetear total local de perdición en todas las eras (visualmente)
-            ['pasado', 'presente', 'futuro'].forEach(era => {
-                 if (era === CURRENT_ERA) { // Solo la era actual
-                    updateCounterUI('perdicion', 'total', 0);
-                 }
-            });
-            // Resetear global visualmente y caché
-            updateCounterUI('perdicion', 'global', 0);
-            globalTotals.perdicion = 0;
-            // Actualizar ciclo
-            updatePerdicionCycle(data.perdicionCycle);
-            // Mostrar notificación principal
-            if (data.notification) showNotification(data.notification);
-            // Mostrar mensaje adicional si se pasó a ciclo 3
-             if (data.perdicionCycle === 3 && data.notification !== "El nivel de Fluzo condensado ha sido alterado") { // Evitar doble mensaje
-                showNotification("El nivel de Fluzo condensado ha sido alterado");
-             }
+    }
+    
+    // Evento para imagen siguiente
+    if (nextButton) {
+        nextButton.addEventListener('click', function() {
+            if (prepImages && currentImageIndex < prepImages.length - 1) {
+                currentImageIndex++;
+                updateImage();
+            }
         });
-
-        socket.on('consecuencias_imprevistas_completed', data => {
-             console.log("Socket.IO: consecuencias_imprevistas_completed", data);
-             consecuenciasImprevistasCompleted = true;
-             disableFluzoControls();
-             if (data.message) showNotification(data.message);
+    }
+    
+    // Abrir el modal cuando se hace clic en el botón
+    if (prepButton) {
+        prepButton.addEventListener('click', function() {
+            prepModal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Evitar scroll
+            
+            // Inicializar la navegación y mostrar la primera imagen
+            currentImageIndex = 0;
+            initializeImageNavigation();
+            updateImage();
         });
-
-        socket.on('victory_conditions_met', data => {
-             console.log("Socket.IO: victory_conditions_met", data);
-             if (data.message) {
-                  const victoryNotification = document.getElementById('victory-notification');
-                  if (victoryNotification) {
-                       victoryNotification.querySelector('p').innerHTML = data.message;
-                       victoryNotification.classList.add('show');
-                       animateVictoryNotification();
-                  }
-             }
+    }
+    
+    // Cerrar el modal cuando se hace clic en la X
+    if (closeModal) {
+        closeModal.addEventListener('click', function() {
+            prepModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restaurar scroll
         });
-
-         socket.on('server_reset', data => {
-             alert(data.message || "El servidor ha sido reiniciado.");
-             window.location.reload();
-         });
-
-        // --- Funciones de Actualización de UI ---
-        function updateCounterUI(type, level, value) { // level = 'total' or 'global'
-            const el = document.getElementById(`${type}-${level}`);
-            if (el && value !== undefined && value !== null) {
-                el.innerText = value;
-                el.classList.remove('highlight-animation');
-                void el.offsetWidth; // Reflow
-                el.classList.add('highlight-animation');
-                setTimeout(() => el.classList.remove('highlight-animation'), 1000);
+    }
+    
+    // Cerrar el modal si se hace clic fuera de él
+    window.addEventListener('click', function(event) {
+        if (event.target === prepModal) {
+            prepModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restaurar scroll
+        }
+    });
+    
+    // Añadir evento para tecla Escape y navegación con flechas
+    window.addEventListener('keydown', function(event) {
+        if (prepModal && prepModal.style.display === 'block') {
+            if (event.key === 'Escape') {
+                prepModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restaurar scroll
+            } else if (event.key === 'ArrowLeft' && currentImageIndex > 0) {
+                currentImageIndex--;
+                updateImage();
+            } else if (event.key === 'ArrowRight' && prepImages && currentImageIndex < prepImages.length - 1) {
+                currentImageIndex++;
+                updateImage();
             }
         }
+    });
+});
 
-        function updatePerdicionCycle(cycle) {
-             const changed = globalTotals.perdicion_cycle !== cycle;
-             globalTotals.perdicion_cycle = cycle; // Actualizar caché global
-             const cycleIndicator = document.getElementById('perdicion-cycle');
-             if (cycleIndicator) {
-                 let text = "";
-                 if (cycle === 1) text = "Plan 1a";
-                 else if (cycle === 2) text = "Plan 1a. Primer avance";
-                 else if (cycle === 3) text = "Plan 1a. Segundo avance";
-                 else text = "FIN"; // O R2? R4? Ajustar según reglas finales
-                 cycleIndicator.textContent = text;
-             }
-             // Habilitar/Deshabilitar controles
-             if (cycle > 3) disablePerdicionControls(); else enablePerdicionControls();
-             // Activar/Desactivar Fluzo (no llamar si no cambió el ciclo para evitar efecto aleatorio)
-             if (changed) toggleFluzoBasedOnCycle(cycle, false); // false = no es carga inicial
-              // Ajustar fluzo si se pasa de 2 a 3
-             if (changed && cycle === 3) adjustFluzoBasedOnRules();
-        }
-
-         function disablePerdicionControls() {
-             document.querySelectorAll('#perdicion-value, [onclick^="updatePerdicionValue"], [onclick="sendPerdicionValue()"]')
-                 .forEach(el => { el.disabled = true; el.classList?.add('disabled'); });
-         }
-         function enablePerdicionControls() {
-             document.querySelectorAll('#perdicion-value, [onclick^="updatePerdicionValue"], [onclick="sendPerdicionValue()"]')
-                 .forEach(el => { el.disabled = false; el.classList?.remove('disabled'); });
-         }
-         function disableFluzoControls() {
-             const block = document.querySelector('.resource-block:nth-child(3)');
-             if (!block) return;
-             block.classList.add('fluzo-disabled');
-             block.querySelectorAll('button').forEach(btn => { btn.disabled = true; btn.classList.add('disabled'); });
-             block.querySelector('#fluzo-value')?.style.setProperty('opacity', '0.5', 'important'); // Forzar opacidad
-              // Añadir mensaje si no existe
-             if (!block.querySelector('.consecuencias-completed')) {
-                  const infoMsg = document.createElement('div');
-                  infoMsg.className = 'consecuencias-completed';
-                  infoMsg.style.cssText = 'color: #ff9999; font-size: 12px; text-align: center; margin-top: 5px;';
-                  infoMsg.textContent = "Consecuencias Imprevistas completado";
-                  block.appendChild(infoMsg);
-             }
-         }
-         function enableFluzoControls() { // Llamada por toggleFluzoBasedOnCycle
-             const block = document.querySelector('.resource-block:nth-child(3)');
-             if (!block) return;
-             block.classList.remove('fluzo-disabled');
-             block.querySelectorAll('button').forEach(btn => { btn.disabled = false; btn.classList.remove('disabled'); });
-             block.querySelector('#fluzo-value')?.style.removeProperty('opacity');
-             block.querySelector('.consecuencias-completed')?.remove(); // Quitar mensaje
-         }
-
-        // --- Carga Inicial ---
-        function checkInitialStatus() {
-            // Cargar totales iniciales
-            fetch(`/get_column_totals/${CURRENT_ROOM_ID}/${CURRENT_ERA}`)
-                .then(res => res.ok ? res.json() : Promise.reject('Error fetch inicial'))
-                .then(data => {
-                    if (data.success && data.columnTotals) {
-                        updateCounterUI('perdicion', 'total', data.columnTotals.perdicion);
-                        updateCounterUI('reserva', 'total', data.columnTotals.reserva);
-                        updateCounterUI('fluzo', 'total', data.columnTotals.fluzo);
-                    }
-                     if (data.success && data.globalTotals) {
-                        globalTotals = data.globalTotals; // Inicializar caché global
-                        updateCounterUI('perdicion', 'global', globalTotals.perdicion);
-                        updateCounterUI('reserva', 'global', globalTotals.reserva);
-                        updatePerdicionCycle(globalTotals.perdicion_cycle); // Esto llama a toggleFluzo
-                        consecuenciasImprevistasCompleted = globalTotals.consecuencias_imprevistas;
-                        if (consecuenciasImprevistasCompleted) disableFluzoControls();
-                    }
-                })
-                .catch(err => console.error("Error carga inicial:", err));
-
-             // Verificar estado inicial botones/biff (ya se hace en renderizado inicial Flask)
-             // Pero re-verificar estado Biff disabled
-             const biffButton = document.getElementById('biff-button');
-             if (biffButton?.classList.contains('disabled')) {
-                  biffButton.disabled = true; // Asegurar que esté realmente disabled
-             }
-        }
-
-    }); // Fin DOMContentLoaded
+// Añadir la nueva función closeVictoryNotification al bloque <script> si no está incluida en el código JavaScript anterior
+function closeVictoryNotification() {
+    const notification = document.getElementById('victory-notification');
+    if (notification) {
+        notification.classList.remove('show');
+        // Remover después de la animación
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+}
 
 </script>
-
 </head>
 <body>
     <div class="content-wrapper">
         {% if is_admin %}
             <div class="admin-badge">MODO ADMINISTRADOR</div>
-            {# Corregir enlace de vuelta si viene de room.html #}
-            <a href="{{ url_for('admin.panel') if request.referrer and 'admin_panel' in request.referrer else url_for('game.room', room_id=room.id) }}" class="back-link">← Volver</a>
+            <a href="{{ url_for('game.room', room_id=room.id) }}" class="back-link">← Volver al Grupo</a>
         {% else %}
             {% if mesa_name %}
                 <div class="mesa-badge">{{ mesa_name }}</div>
             {% endif %}
             <a href="{{ url_for('auth.logout') }}" class="back-link">← Cerrar sesión</a>
         {% endif %}
-
+        
         <h1 style="display: flex; justify-content: center; align-items: center; gap: 15px;">
-             <span>{% if mesa_name %}{{ mesa_name }}{% else %}{{ room.name }}{% endif %} - {{ era|capitalize }}</span>
-             <button id="prep-button" class="prep-button">Preparación</button>
-        </h1>
+    {% if mesa_name %}
+        <span>{{ mesa_name }} - {{ era|capitalize }}</span>
+    {% else %}
+        <span>{{ room.name }} - {{ era|capitalize }}</span>
+    {% endif %}
+    <button id="prep-button" class="prep-button">Preparación</button>
+</h1>
 
-        <!-- Modal Preparación (sin cambios) -->
-        <div id="prep-modal" class="prep-modal">
-            <div class="prep-modal-content">
-                <span class="close-modal">×</span>
-                <h2>Preparación - {{ era|capitalize }}</h2>
-                <div class="image-container">
-                    {% if era == "pasado" %}
-                        <img src="{{ url_for('static', filename='images/preparacion_base.jpg') }}" alt="Prep Base" class="prep-image active">
-                        <img src="{{ url_for('static', filename='images/preparacion_pasado.jpg') }}" alt="Prep Pasado" class="prep-image">
-                    {% elif era == "presente" %}
-                         <img src="{{ url_for('static', filename='images/preparacion_base.jpg') }}" alt="Prep Base" class="prep-image active">
-                        <img src="{{ url_for('static', filename='images/preparacion_presente.jpg') }}" alt="Prep Presente" class="prep-image">
-                    {% else %}
-                         <img src="{{ url_for('static', filename='images/preparacion_base.jpg') }}" alt="Prep Base" class="prep-image active">
-                        <img src="{{ url_for('static', filename='images/preparacion_futuro.jpg') }}" alt="Prep Futuro" class="prep-image">
-                    {% endif %}
-                </div>
-                <div class="image-navigation">
-                    <button id="prev-image" class="nav-button">< Anterior</button>
-                    <span id="image-counter">1 / 2</span>
-                    <button id="next-image" class="nav-button">Siguiente ></button>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECCIÓN DE ANUNCIOS (HTML Corregido) -->
-        <div class="section-container">
-            <div class="section-title">Anuncios</div>
-            {% if is_admin %}
-            <div class="reset-buttons-container">
-                <button class="reset-button" onclick="resetAnnouncements()">Resetear Anuncios</button>
-            </div>
+<!-- Modal para la imagen de preparación con imágenes específicas por era -->
+<div id="prep-modal" class="prep-modal">
+    <div class="prep-modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Preparación - {{ era|capitalize }}</h2>
+        <div class="image-container">
+            {% if era == "pasado" %}
+                <!-- Imágenes para la era Pasado -->
+                <img src="{{ url_for('static', filename='images/preparacion_base.jpg') }}" alt="Preparación Pasado 1" class="prep-image active">
+                <img src="{{ url_for('static', filename='images/preparacion_pasado.jpg') }}" alt="Preparación Pasado 2" class="prep-image">
+            {% elif era == "presente" %}
+                <!-- Imágenes para la era Presente -->
+                <img src="{{ url_for('static', filename='images/preparacion_base.jpg') }}" alt="Preparación Presente 1" class="prep-image active">
+                <img src="{{ url_for('static', filename='images/preparacion_presente.jpg') }}" alt="Preparación Presente 2" class="prep-image">
+            {% else %}
+                <!-- Imágenes para la era Futuro -->
+                <img src="{{ url_for('static', filename='images/preparacion_base.jpg') }}" alt="Preparación Futuro 1" class="prep-image active">
+                <img src="{{ url_for('static', filename='images/preparacion_futuro.jpg') }}" alt="Preparación Futuro 2" class="prep-image">
             {% endif %}
-            <div class="announcements-grid era-{{ era }}">
-                {% for i in range(button_info|length) %}
-                    <button
-                        type="button" {# Tipo botón #}
-                        id="game-button-{{ i }}" {# ID para JS #}
-                        class="game-button button-{{ era }}-{{ i }}
-                               {% if progress[era][i] %}active{% endif %}
+        </div>
+        <div class="image-navigation">
+            <button id="prev-image" class="nav-button">&lt; Anterior</button>
+            <span id="image-counter">1 / 2</span>
+            <button id="next-image" class="nav-button">Siguiente &gt;</button>
+        </div>
+    </div>
+</div>
+
+	<!-- SECCIÓN DE ANUNCIOS -->
+    <div class="section-container">
+        <div class="section-title">Anuncios</div>
+        {% if is_admin %}
+        <div class="reset-buttons-container">
+            <button class="reset-button" onclick="resetAnnouncements()">Resetear Anuncios</button>
+        </div>
+        {% endif %}
+        <div class="announcements-grid era-{{ era }}">
+            {% for i in range(button_info|length) %}
+                <form id="form-button-{{ i }}" action="{{ url_for('game.toggle_button', room_id=room.id, era=era, button_idx=i) }}" method="post" onsubmit="return confirmDemarking({{ i }}, {{ progress[era][i]|tojson }});">
+                    <button 
+                        type="submit"
+                        class="game-button button-{{ era }}-{{ i }} 
+                               {% if progress[era][i] %}active{% endif %} 
                                {% if not progress[era][i] and available_buttons[i] %}available{% endif %}
                                {% if not available_buttons[i] and not progress[era][i] %}disabled{% endif %}"
                         {% if not available_buttons[i] and not progress[era][i] %}disabled{% endif %}
-                        data-room-id="{{ room.id }}" {# Datos para JS #}
-                        data-era="{{ era }}"
-                        data-button-idx="{{ i }}"
-                        onclick="toggleAnnouncementButton(this)" {# Llamada JS #}
                     >
-                        <div style="width: 100%; padding-bottom: 20px;">{{ button_info[i] | safe }}</div> {# Usar safe si el texto tiene HTML #}
+                        <div style="width: 100%; padding-bottom: 20px;">{{ button_info[i] }}</div>
                         {% if progress[era][i] %}
                             <span class="status-badge">Completado</span>
                         {% endif %}
                     </button>
-                {% endfor %}
-            </div>
+                </form>
+            {% endfor %}
         </div>
-
-        <!-- SECCIÓN DE BIFF TANNEN (HTML sin cambios) -->
-        <div class="section-container">
-            <div class="section-title">Derrotas de Biff Tannen</div>
-            {% if is_admin %}
-            <div class="reset-buttons-container">
-                <button class="reset-button" onclick="resetBiff()">Resetear Biff</button>
-            </div>
-            {% endif %}
-            <div class="biff-button-container">
-                <button
-                    id="biff-button"
-                    onclick="defeatBiff()" {# Llamada JS #}
-                    class="biff-button {% if biff_disabled %}disabled{% endif %}"
-                    {% if biff_disabled %}disabled title="Biff ya está en la zona de victoria"{% endif %}
-                >
-                    {% if biff_defeats == 0 %}Sin derrotas
-                    {% elif biff_defeats == 1 %}Derrotado 1 vez
-                    {% else %}Derrotado {{ biff_defeats }} veces
-                    {% endif %}
-                </button>
-            </div>
+    </div>
+<!-- SECCIÓN DE BIFF TANNEN -->
+    <div class="section-container">
+        <div class="section-title">Derrotas de Biff Tannen</div>
+        {% if is_admin %}
+        <div class="reset-buttons-container">
+            <button class="reset-button" onclick="resetBiff()">Resetear Biff</button>
         </div>
+        {% endif %}
+        <div class="biff-button-container">
+            <button 
+                id="biff-button"
+                onclick="defeatBiff()"
+                class="biff-button {% if biff_disabled %}disabled{% endif %}"
+                {% if biff_disabled %}disabled{% endif %}
+                {% if biff_disabled %}title="Biff Tannen ha sido añadido a la zona de victoria"{% endif %}
+            >
+                {% if biff_defeats == 0 %}
+                    Sin derrotas
+                {% elif biff_defeats == 1 %}
+                    Derrotado 1 vez
+                {% else %}
+                    Derrotado {{ biff_defeats }} veces
+                {% endif %}
+            </button>
+        </div>
+    </div>
+<!-- SECCIÓN DE RECURSOS con funciones separadas -->
+    <div class="section-container">
+        {% if is_admin %}
+        <div class="reset-buttons-container">
+            <button class="reset-button" onclick="resetColumn('perdicion')">Resetear Perdición</button>
+            <button class="reset-button" onclick="resetColumn('reserva')">Resetear Reserva</button>
+        </div>
+        {% endif %}
+        
+        <div class="section-title">Contadores</div>
+        
+        <div class="resources-flex">
+            <!-- Perdición -->
+            <div class="resource-block">
+                <h3>Perdición</h3>
+                <div id="perdicion-cycle" class="cycle-indicator">
+                {% if perdicion_cycle == 1 %}
+                    Plan 1a
+                {% elif perdicion_cycle == 2 %}
+                    Plan 1a. Primer avance
+                {% elif perdicion_cycle == 3 %}
+                    Plan 1a. Segundo avance
+                {% else %}
+                    FIN
+                {% endif %}
+                </div>
 
-        <!-- SECCIÓN DE RECURSOS (HTML con llamadas JS) -->
-        <div class="section-container">
-            {% if is_admin %}
-            <div class="reset-buttons-container">
-                <button class="reset-button" onclick="resetColumn('perdicion')">Reset Perdición</button>
-                <button class="reset-button" onclick="resetColumn('reserva')">Reset Reserva</button>
-                {# Podrías añadir reset para Fluzo si tiene sentido #}
-                 <button class="reset-button" onclick="resetColumn('fluzo')">Reset Fluzo</button>
-            </div>
-            {% endif %}
-            <div class="section-title">Contadores</div>
-            <div class="resources-flex">
-                <!-- Perdición -->
-                <div class="resource-block">
-                    <h3>Perdición</h3>
-                    <div id="perdicion-cycle" class="cycle-indicator">{% if perdicion_cycle == 1 %}Plan 1a{% elif perdicion_cycle == 2 %}Plan 1a. 1er Avance{% elif perdicion_cycle == 3 %}Plan 1a. 2º Avance{% else %}FIN{% endif %}</div>
-                    <button class="btn-plus {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="updateCounterValue('perdicion', 1)" {% if perdicion_cycle > 3 %}disabled{% endif %}>+</button>
-                    <div id="perdicion-value" class="value-display">0</div>
-                    <button class="btn-minus {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="updateCounterValue('perdicion', -1)" {% if perdicion_cycle > 3 %}disabled{% endif %}>−</button>
-                    <button class="btn-send {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="sendCounterValue('perdicion')" {% if perdicion_cycle > 3 %}disabled{% endif %}>Enviar</button>
-                    <div class="total-display"><span>Local: </span><span id="perdicion-total">{{ column_totals.perdicion | default(0) }}</span></div>
-                    <div class="global-display"><span>Global: </span><span id="perdicion-global">0</span></div> {# Se carga con JS #}
+                <button class="btn-plus {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="updatePerdicionValue(1)" {% if perdicion_cycle > 3 %}disabled{% endif %}>+</button>
+                <div id="perdicion-value" class="value-display">0</div>
+                <button class="btn-minus {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="updatePerdicionValue(-1)" {% if perdicion_cycle > 3 %}disabled{% endif %}>−</button>
+                <button class="btn-send {% if perdicion_cycle > 3 %}disabled{% endif %}" onclick="sendPerdicionValue()" {% if perdicion_cycle > 3 %}disabled{% endif %}>Enviar</button>
+                <div class="total-display">
+                    <span>Enviado: </span><span id="perdicion-total">{{ column_totals.perdicion if column_totals else 0 }}</span>
                 </div>
-                <!-- Reserva -->
-                <div class="resource-block">
-                    <h3>Reserva</h3>
-                    <button class="btn-plus" onclick="updateCounterValue('reserva', 1)">+</button>
-                    <div id="reserva-value" class="value-display">0</div>
-                    <button class="btn-minus" onclick="updateCounterValue('reserva', -1)">−</button>
-                    <button class="btn-send" onclick="sendCounterValue('reserva')">Enviar</button>
-                    <div class="total-display"><span>Local: </span><span id="reserva-total">{{ column_totals.reserva | default(0) }}</span></div>
-                    <div class="global-display"><span>Global: </span><span id="reserva-global">0</span></div> {# Se carga con JS #}
-                </div>
-                <!-- Fluzo -->
-                <div class="resource-block {% if perdicion_cycle == 1 %}fluzo-disabled{% endif %}">
-                    <h3>Fluzo</h3>
-                    <div style="display: flex; justify-content: center; margin-bottom: 5px;">
-                        <button class="btn-plus {% if perdicion_cycle == 1 %}disabled{% endif %}" onclick="updateCounterValue('fluzo', 1)" {% if perdicion_cycle == 1 %}disabled{% endif %} style="width: 40px; margin: 0 5px;">+1</button>
-                        <button class="btn-plus {% if perdicion_cycle == 1 %}disabled{% endif %}" onclick="updateCounterValue('fluzo', 5)" {% if perdicion_cycle == 1 %}disabled{% endif %} style="width: 40px; margin: 0 5px;">+5</button>
-                    </div>
-                    <div id="fluzo-value" class="value-display" style="margin: 5px auto; {% if perdicion_cycle == 1 %}opacity: 0.5;{% endif %}">0</div>
-                    <div style="display: flex; justify-content: center; margin-top: 5px;">
-                        <button class="btn-minus {% if perdicion_cycle == 1 %}disabled{% endif %}" onclick="updateCounterValue('fluzo', -1)" {% if perdicion_cycle == 1 %}disabled{% endif %} style="width: 40px; margin: 0 5px;">-1</button>
-                        <button class="btn-minus {% if perdicion_cycle == 1 %}disabled{% endif %}" onclick="updateCounterValue('fluzo', -5)" {% if perdicion_cycle == 1 %}disabled{% endif %} style="width: 40px; margin: 0 5px;">-5</button>
-                    </div>
-                    <button class="btn-send {% if perdicion_cycle == 1 %}disabled{% endif %}" onclick="sendCounterValue('fluzo')" {% if perdicion_cycle == 1 %}disabled{% endif %} style="margin-top: 10px;">Comprobar</button>
-                    <div class="total-display"><span>Valor: </span><span id="fluzo-total">{{ column_totals.fluzo | default(0) }}</span></div>
-                    {# Fluzo no tiene contador global #}
+                <div class="global-display">
+                    <span>Global: </span><span id="perdicion-global">0</span>
                 </div>
             </div>
+            
+            <!-- Reserva -->
+            <div class="resource-block">
+                <h3>Reserva</h3>
+                <button class="btn-plus" onclick="updateReservaValue(1)">+</button>
+                <div id="reserva-value" class="value-display">0</div>
+                <button class="btn-minus" onclick="updateReservaValue(-1)">−</button>
+                <button class="btn-send" onclick="sendReservaValue()">Enviar</button>
+                <div class="total-display">
+                    <span>Enviado: </span><span id="reserva-total">{{ column_totals.reserva if column_totals else 0 }}</span>
+                </div>
+                <div class="global-display">
+                    <span>Global: </span><span id="reserva-global">0</span>
+                </div>
+            </div>
+            
+<!-- Fluzo -->
+<div class="resource-block {% if perdicion_cycle == 1 %}fluzo-disabled{% endif %}">
+    <h3>Fluzo condensado</h3>
+    <div style="display: flex; justify-content: center; margin-bottom: 5px;">
+        <button class="btn-plus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(1)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">+1</button>
+                
+        <button class="btn-plus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(5)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">+5</button>
+    </div>
+    
+    <div id="fluzo-value" class="value-display" style="margin: 5px auto; {% if perdicion_cycle == 1 %}opacity: 0.5;{% endif %}">0</div>
+    
+    <div style="display: flex; justify-content: center; margin-top: 5px;">
+        <button class="btn-minus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(-1)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">-1</button>
+                
+        <button class="btn-minus {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+                onclick="updateFluzoValue(-5)" 
+                {% if perdicion_cycle == 1 %}disabled{% endif %}
+                style="width: 40px; margin: 0 5px;">-5</button>
+    </div>
+    
+    <!-- Botón Comprobar -->
+    <button class="btn-send {% if perdicion_cycle == 1 %}disabled{% endif %}" 
+            onclick="checkFluzoValue()" 
+            {% if perdicion_cycle == 1 %}disabled{% endif %}
+            style="margin-top: 10px;">Comprobar</button>
+    
+    <div class="total-display">
+        <span>Valor: </span><span id="fluzo-total">{{ column_totals.fluzo if column_totals else 0 }}</span>
+    </div>
+</div>
+</div>
+</div>
+<!-- Notificación con botón de Aceptar funcional -->
+    <div id="game-notification" class="game-notification">
+        <div class="notification-content">
+            <p></p>
+            <button class="notification-btn" onclick="closeNotification()">Aceptar</button>
         </div>
+    </div>
+<!-- Notificación de victoria con animación -->
+<div id="victory-notification" class="game-notification">
+    <div class="notification-content">
+        <p>->R1</p>
+        <button class="notification-btn" onclick="closeVictoryNotification()">¡Entendido!</button>
+    </div>
+</div>
 
-        <!-- Notificaciones (sin cambios) -->
-        <div id="game-notification" class="game-notification"></div>
-        <div id="victory-notification" class="game-notification"></div>
-
-    </div> {# Fin content-wrapper #}
 </body>
 </html>
