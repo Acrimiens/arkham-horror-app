@@ -654,7 +654,6 @@
     max-width: 500px;
     text-align: center;
     box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
-    animation: victoryPulse 2s infinite alternate;
 }
 
 #victory-notification p {
@@ -684,14 +683,7 @@
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
-@keyframes victoryPulse {
-    0% {
-        transform: scale(1);
-    }
-    100% {
-        transform: scale(1.03);
-    }
-}
+
 
 /* Estilos para el botón de preparación */
 .prep-button {
@@ -874,6 +866,83 @@
     min-width: 50px;
     text-align: center;
 }
+
+
+/* Estilos modificados para la notificación de victoria */
+#victory-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    overflow: auto; /* Permitir scroll */
+}
+
+#victory-notification.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#victory-notification .notification-content {
+    background-color: rgba(30, 20, 10, 0.95);
+    border: 3px solid #ffd700;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 90%;
+    max-height: 90vh;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+    overflow-y: auto; /* Permitir scroll vertical */
+    margin: 20px;
+}
+
+#victory-notification .resolution-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px;
+    border: 1px solid #ffd700;
+}
+
+#victory-notification .notification-btn {
+    padding: 12px 30px;
+    background-color: #443311;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+#victory-notification .notification-btn:hover {
+    background-color: #664411;
+    transform: translateY(-3px);
+}
+
+/* Estilos responsive para la notificación */
+@media (max-width: 600px) {
+    #victory-notification .notification-content {
+        max-width: 95%;
+        padding: 15px;
+    }
+    
+    #victory-notification .notification-btn {
+        padding: 8px 20px;
+        font-size: 16px;
+    }
+}
+
 
     </style>
 <script>
@@ -1931,23 +2000,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== EVENTOS PARA FLUZO ==========
     
     // Evento de actualización de fluzo
-    socket.on('fluzo_update', function(data) {
-        // Verificar que la actualización sea para nuestra sala y era
-        if (data.room_id === currentRoom && data.era === currentEra) {
-            console.log("Recibido evento de actualización de fluzo", data);
+socket.on('fluzo_update', function(data) {
+    // Verificar que la actualización sea para nuestra sala y era
+    if (data.room_id === currentRoom && data.era === currentEra) {
+        console.log("Recibido evento de actualización de fluzo", data);
+        
+        // Actualizar el valor en pantalla (la caja)
+        const valueElement = document.getElementById('fluzo-value');
+        if (valueElement && data.fluzoValue !== undefined) {
+            valueElement.innerText = data.fluzoValue;
+        }
+        
+        // Actualizar el total acumulado (solo visible para admin)
+        const totalElement = document.getElementById('fluzo-total');
+        if (totalElement && data.fluzoTotal !== undefined) {
+            // Si el elemento existe, actualizar su valor interno aunque no sea visible
+            totalElement.innerText = data.fluzoTotal;
             
-            // Actualizar el valor en pantalla (la caja)
-            const valueElement = document.getElementById('fluzo-value');
-            if (valueElement && data.fluzoValue !== undefined) {
-                valueElement.innerText = data.fluzoValue;
-            }
-            
-            // Actualizar el total acumulado
-            const totalElement = document.getElementById('fluzo-total');
-            if (totalElement && data.fluzoTotal !== undefined) {
-                totalElement.innerText = data.fluzoTotal;
-                
-                // Añadir animación de resaltado
+            // Agregar la animación solo si el elemento es visible (para admins)
+            if (window.getComputedStyle(totalElement).display !== 'none') {
                 totalElement.classList.add('highlight-animation');
                 
                 // Eliminar la animación después de que termine
@@ -1955,23 +2026,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     totalElement.classList.remove('highlight-animation');
                 }, 1000);
             }
-            
-            // Verificar el estado de Consecuencias Imprevistas
-            if (data.consecuenciasCompleted) {
-                consecuenciasImprevistasCompleted = true;
-                disableFluzoControls();
-            }
-            
-            // Si hay un mensaje y NO estamos en modo silencioso, mostrarlo
-            if (data.message && !data.silent) {
-                showNotification(data.message);
-            }
-            // Si es un valor aleatorio, NO mostrar la notificación si está marcado como silencioso
-            else if (data.isRandomValue && !data.silent) {
-                //showNotification(`¡La energía de Fluzo condensado se ha estabilizado en ${data.fluzoTotal}!`);
-            }
         }
-    });
+        
+        // Verificar el estado de Consecuencias Imprevistas
+        if (data.consecuenciasCompleted) {
+            consecuenciasImprevistasCompleted = true;
+            disableFluzoControls();
+        }
+        
+        // Si hay un mensaje y NO estamos en modo silencioso, mostrarlo
+        if (data.message && !data.silent) {
+            showNotification(data.message);
+        }
+    }
+});
     
     // ========== EVENTOS PARA CONSECUENCIAS IMPREVISTAS ==========
     
@@ -2095,68 +2163,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== CARGA INICIAL DE DATOS ==========
     
     // Obtener datos iniciales de columnas del servidor cuando se carga la página
-    fetch('/get_column_totals/' + currentRoom + '/' + currentEra, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error de red: ' + response.status);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Actualizar totales de columnas con datos del servidor
-            if (data.columnTotals) {
-                // Actualizar perdición
-                const perdicionTotalElement = document.getElementById('perdicion-total');
-                if (perdicionTotalElement && data.columnTotals.perdicion !== undefined) {
-                    perdicionTotalElement.innerText = data.columnTotals.perdicion;
-                }
-                
-                // Actualizar reserva
-                const reservaTotalElement = document.getElementById('reserva-total');
-                if (reservaTotalElement && data.columnTotals.reserva !== undefined) {
-                    reservaTotalElement.innerText = data.columnTotals.reserva;
-                }
-                
-                // Actualizar fluzo si existe
-                const fluzoTotalElement = document.getElementById('fluzo-total');
-                if (fluzoTotalElement && data.columnTotals.fluzo !== undefined) {
-                    fluzoTotalElement.innerText = data.columnTotals.fluzo;
-                }
+fetch('/get_column_totals/' + currentRoom + '/' + currentEra, {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+    }
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Error de red: ' + response.status);
+    }
+    return response.json();
+})
+.then(data => {
+    if (data.success) {
+        // Actualizar totales de columnas con datos del servidor
+        if (data.columnTotals) {
+            // Actualizar perdición
+            const perdicionTotalElement = document.getElementById('perdicion-total');
+            if (perdicionTotalElement && data.columnTotals.perdicion !== undefined) {
+                perdicionTotalElement.innerText = data.columnTotals.perdicion;
             }
             
-            // Actualizar los contadores globales
-            if (data.globalTotals) {
-                // Actualizar perdición global
-                const perdicionGlobalElement = document.getElementById('perdicion-global');
-                if (perdicionGlobalElement && data.globalTotals.perdicion !== undefined) {
-                    globalTotals['perdicion'] = data.globalTotals.perdicion;
-                    perdicionGlobalElement.innerText = data.globalTotals.perdicion;
-                }
-                
-                // Actualizar reserva global
-                const reservaGlobalElement = document.getElementById('reserva-global');
-                if (reservaGlobalElement && data.globalTotals.reserva !== undefined) {
-                    globalTotals['reserva'] = data.globalTotals.reserva;
-                    reservaGlobalElement.innerText = data.globalTotals.reserva;
-                }
-                
-                // Actualizar ciclo de perdición
-                if (data.globalTotals.perdicion_cycle !== undefined) {
-                    globalTotals['perdicion_cycle'] = data.globalTotals.perdicion_cycle;
-                    updatePerdicionCycle(data.globalTotals.perdicion_cycle);
-                }
+            // Actualizar reserva
+            const reservaTotalElement = document.getElementById('reserva-total');
+            if (reservaTotalElement && data.columnTotals.reserva !== undefined) {
+                reservaTotalElement.innerText = data.columnTotals.reserva;
+            }
+            
+            // Actualizar fluzo si existe 
+            // El elemento puede ser visible o no, pero siempre debe mantener el valor correcto internamente
+            const fluzoTotalElement = document.getElementById('fluzo-total');
+            if (fluzoTotalElement && data.columnTotals.fluzo !== undefined) {
+                fluzoTotalElement.innerText = data.columnTotals.fluzo;
+                // No se aplica ninguna animación en la carga inicial
             }
         }
-    })
-    .catch(error => {
-        console.error("Error al obtener totales de columna:", error);
-    });
+        
+        // Continuar con el resto del código...
+    }
+})
+.catch(error => {
+    console.error("Error al obtener totales de columna:", error);
+});
 
     // Verificar si Consecuencias Imprevistas ya está completado
     function checkConsecuenciasImprevistasStatus() {
@@ -2197,83 +2246,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== EVENTOS PARA LAS CONDICIONES DE VICTORIA ==========
     
-    // Escuchar el evento de condiciones de victoria cumplidas
-    socket.on('victory_conditions_met', function(data) {
-        console.log("¡Se han cumplido las condiciones de victoria!", data);
-        
-        // Mostrar notificación especial
-        if (data.message) {
-            // Crear un estilo especial para la notificación de victoria
-            const victoryNotification = document.createElement('div');
-            victoryNotification.id = 'victory-notification';
-            victoryNotification.className = 'game-notification show';
-            victoryNotification.style.zIndex = '2000'; // Mayor que la notificación normal
-            
-            // Contenido de la notificación con estilo especial
-            victoryNotification.innerHTML = `
-                <div class="notification-content" style="background-color: rgba(30, 20, 10, 0.95); border: 3px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);">
-                    <p style="color: #ffd700; font-size: 32px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">${data.message}</p>
-                    <button class="notification-btn" style="background-color: #443311; color: #ffd700; border-color: #ffd700; font-size: 18px;" onclick="closeVictoryNotification()">¡Entendido!</button>
-                </div>
-            `;
-            
-            // Agregar al cuerpo del documento, reemplazando cualquier notificación de victoria existente
-            const existingVictory = document.getElementById('victory-notification');
-            if (existingVictory) {
-                existingVictory.remove();
-            }
-            document.body.appendChild(victoryNotification);
-            
-            // Añadir vibraciones sutiles a la notificación para llamar más la atención
-            animateVictoryNotification();
-        }
-    });
+// Escuchar el evento de condiciones de victoria cumplidas
+socket.on('victory_conditions_met', function(data) {
+    console.log("¡Se han cumplido las condiciones de victoria!", data);
     
-    // Función para animar la notificación de victoria
-    function animateVictoryNotification() {
-        const notification = document.getElementById('victory-notification');
-        if (!notification) return;
+    // Mostrar notificación especial
+    if (data.message) {
+        // Determinar qué resolución mostrar basado en el mensaje
+        let imagePath = '';
+        let messageText = '';
         
-        const content = notification.querySelector('.notification-content');
-        if (!content) return;
+        if (data.message === "->R1") {
+            imagePath = "{{ url_for('static', filename='images/Resolucion_1.png') }}";
+            messageText = "->R1";
+        } else if (data.message === "->R2") {
+            imagePath = "{{ url_for('static', filename='images/Resolucion_2.png') }}";
+            messageText = "->R2";
+        }
         
-        // Crear el efecto de brillo radiante
-        content.style.transition = 'box-shadow 1s ease-in-out';
+        // Crear un estilo especial para la notificación de victoria
+        const victoryNotification = document.createElement('div');
+        victoryNotification.id = 'victory-notification';
+        victoryNotification.className = 'game-notification show';
         
-        let glowIntensity = 0;
-        let growing = true;
+        // Contenido de la notificación con la imagen
+        victoryNotification.innerHTML = `
+            <div class="notification-content">
+                <img src="${imagePath}" alt="Resolución ${messageText}" class="resolution-image">
+                <p>${messageText}</p>
+                <button class="notification-btn" onclick="closeVictoryNotification()">¡Entendido!</button>
+            </div>
+        `;
         
-        const glowAnimation = setInterval(() => {
-            if (growing) {
-                glowIntensity += 2;
-                if (glowIntensity >= 40) growing = false;
-            } else {
-                glowIntensity -= 2;
-                if (glowIntensity <= 10) growing = true;
-            }
-            
-            content.style.boxShadow = `0 0 ${glowIntensity}px rgba(255, 215, 0, 0.8)`;
-            
-            // Verificar si la notificación sigue existiendo
-            if (!document.getElementById('victory-notification')) {
-                clearInterval(glowAnimation);
-            }
-        }, 100);
+        // Agregar al cuerpo del documento, reemplazando cualquier notificación de victoria existente
+        const existingVictory = document.getElementById('victory-notification');
+        if (existingVictory) {
+            existingVictory.remove();
+        }
+        document.body.appendChild(victoryNotification);
     }
+});
+    
+ 
     
     // Función para cerrar la notificación de victoria
     function closeVictoryNotification() {
         const notification = document.getElementById('victory-notification');
         if (notification) {
-            notification.classList.remove('show');
             // Remover después de la animación
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
         }
     }
+
 
     // ========== MODAL DE PREPARACIÓN CON NAVEGACIÓN DE IMÁGENES ==========
     
@@ -2580,6 +2606,7 @@ function closeVictoryNotification() {
             </div>
             
 <!-- Fluzo -->
+<!-- Fluzo - Modificado para ocultar el valor total a no-administradores -->
 <div class="resource-block {% if perdicion_cycle == 1 %}fluzo-disabled{% endif %}">
     <h3>Fluzo condensado</h3>
     <div style="display: flex; justify-content: center; margin-bottom: 5px;">
@@ -2615,7 +2642,14 @@ function closeVictoryNotification() {
             style="margin-top: 10px;">Comprobar</button>
     
     <div class="total-display">
-        <span>Valor: </span><span id="fluzo-total">{{ column_totals.fluzo if column_totals else 0 }}</span>
+        <span>Valor: </span>
+        <!-- Mostrar valor solo para administradores -->
+        {% if is_admin %}
+            <span id="fluzo-total">{{ column_totals.fluzo if column_totals else 0 }}</span>
+        {% else %}
+            <span id="fluzo-total" style="display: none;">{{ column_totals.fluzo if column_totals else 0 }}</span>
+            <span>***</span>
+        {% endif %}
     </div>
 </div>
 </div>
@@ -2627,10 +2661,11 @@ function closeVictoryNotification() {
             <button class="notification-btn" onclick="closeNotification()">Aceptar</button>
         </div>
     </div>
-<!-- Notificación de victoria con animación -->
+<!-- Notificación de victoria con imagen -->
 <div id="victory-notification" class="game-notification">
     <div class="notification-content">
-        <p>->R1</p>
+        <img src="" alt="Resolución" class="resolution-image">
+        <p></p>
         <button class="notification-btn" onclick="closeVictoryNotification()">¡Entendido!</button>
     </div>
 </div>

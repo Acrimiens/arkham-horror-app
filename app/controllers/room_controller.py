@@ -40,9 +40,9 @@ def check_victory_conditions():
             # 3. Verificar si "Un noble legado" está marcado en todas las eras
             # Identificar qué índice corresponde al anuncio de "Un noble legado" en cada era
             noble_legado_indices = {
-                "pasado": 5,  # índice 5 en la era pasado
-                "presente": 4,  # índice 4 en la era presente
-                "futuro": 3    # índice 3 en la era futuro
+                "pasado": 5,  # índice 5 en la era pasado (sin cambios)
+                "presente": 5,  # índice 5 en la era presente (antes era 4, ahora 5)
+                "futuro": 4    # índice 4 en la era futuro (antes era 3, ahora 4)
             }
             
             for era, idx in noble_legado_indices.items():
@@ -185,6 +185,12 @@ def toggle_button(room_id, era, button_idx):
             else:
                 # Si estamos activando, simplemente activamos este botón
                 room_data["progress"][era][button_idx] = True
+                
+                # NUEVO: Si es el botón de "Se ha plantado la semilla de un árbol" en pasado (índice 4)
+                if era == "pasado" and button_idx == 4:
+                    # Activar automáticamente los botones correspondientes en presente y futuro
+                    room_data["progress"]["presente"][4] = True  # Semilla en Presente
+                    room_data["progress"]["futuro"][3] = True    # Semilla en Futuro
         else:
             # Verificar si se cumplen las dependencias para activar
             if is_activating:
@@ -199,10 +205,22 @@ def toggle_button(room_id, era, button_idx):
                 if can_toggle:
                     # Cambiar el estado del botón (activar)
                     room_data["progress"][era][button_idx] = True
+                    
+                    # NUEVO: Si es el botón de "Se ha plantado la semilla de un árbol" en pasado (índice 4)
+                    if era == "pasado" and button_idx == 4:
+                        # Activar automáticamente los botones correspondientes en presente y futuro
+                        room_data["progress"]["presente"][4] = True  # Semilla en Presente
+                        room_data["progress"]["futuro"][3] = True    # Semilla en Futuro
             else:
                 # Si está desactivando, verificar y desactivar dependientes
                 room_data["progress"][era][button_idx] = False
                 deactivate_dependent_buttons(room_data["progress"], f"{era}-{button_idx}")
+                
+                # NUEVO: Si es el botón de "Se ha plantado la semilla de un árbol" en pasado (índice 4)
+                if era == "pasado" and button_idx == 4:
+                    # Desactivar automáticamente los botones correspondientes en presente y futuro
+                    room_data["progress"]["presente"][4] = False  # Semilla en Presente
+                    room_data["progress"]["futuro"][3] = False    # Semilla en Futuro
         
         # Verificar todos los botones en todas las eras para determinar las dependencias correctamente
         all_available_buttons = get_available_buttons(room_data["progress"])
@@ -555,7 +573,7 @@ def update_column_resource(room_id, era, column):
                 notifications = {
                     1: "Haz avanzar al Plan 1b",
                     2: "Haz avanzar al Plan 1b. El valor de Fluzo ha sido alterado",
-                    3: "(->R2)"
+                    3: "->R2"
                 }
                 notification = notifications[current_cycle]
                 
@@ -565,6 +583,12 @@ def update_column_resource(room_id, era, column):
                 
                 # Marcamos que se completó un ciclo
                 cycle_completed = True
+                
+                # Si estamos en el ciclo 3 (pasando a 4), emitir evento de victoria R2
+                if current_cycle == 3:
+                    socketio.emit('victory_conditions_met', {
+                        'message': "->R2"
+                    })
                 
                 # Reiniciamos los contadores de perdición para todas las salas
                 # 1. Reiniciamos los contadores de la sala actual
@@ -730,7 +754,7 @@ def update_perdicion(room_id, era):
             notifications = {
                 1: "Haz avanzar al Plan 1b",
                 2: "Haz avanzar al Plan 1b. El valor de Fluzo ha sido alterado",
-                3: "(->R4)"
+                3: "->R2"
             }
             notification = notifications[current_cycle]
             
@@ -740,6 +764,12 @@ def update_perdicion(room_id, era):
             
             # Marcamos que se completó un ciclo
             cycle_completed = True
+            
+            # Si estamos en el ciclo 3 (pasando a 4), emitir evento de victoria R2
+            if current_cycle == 3:
+                socketio.emit('victory_conditions_met', {
+                    'message': "->R2"
+                })
             
             # Reiniciamos los contadores de perdición para todas las salas
             # 1. Reiniciamos los contadores de la sala actual

@@ -18,12 +18,14 @@ class GameData:
             "Se ha construido el observatorio.",
             "Ha empezado la investigación sobre el teletransporte.",
             "Se ha pagado la deuda.",
+            "Se ha plantado la semilla de un árbol.",  # Nuevo botón añadido
             "Se ha añadido \"Un noble legado\" a la zona de victoria."
         ],
         "futuro": [
             "Thomas y Mary han realizado un descubrimiento histórico.",
             "Thomas y Mary han ganado un Premio Nobel.",
             "Coloca una semilla en la Universidad Miskatonic PASADO.",
+            "Se ha plantado la semilla de un árbol.",  # Nuevo botón añadido
             "Se ha añadido \"Un noble legado\" a la zona de victoria."
         ]
     }
@@ -35,7 +37,7 @@ class GameData:
             1: [],  # Pasado 2: Se puede activar libremente
             2: [],  # Pasado 3: Se puede activar libremente
             3: ["pasado-0"],  # Pasado 4: Requiere Pasado 1
-            4: [],   # Pasado 5: Se puede activar libremente
+            4: ["futuro-2"],   # Pasado 5: Se puede activar libremente
             5: []   # Pasado 6 (Noble legado): Se puede activar libremente
         },
         "presente": {
@@ -43,13 +45,15 @@ class GameData:
             1: ["pasado-1"],  # Presente 2: Requiere Pasado 2
             2: ["pasado-2", "presente-1"],  # Presente 3: Requiere Pasado 3 y Presente 2
             3: [],  # Presente 4: Se puede activar libremente
-            4: []   # Presente 5 (Noble legado): Se puede activar libremente
+            4: ["pasado-4"],  # Presente 5 (Semilla árbol): Requiere Pasado 5 (semilla en pasado)
+            5: []   # Presente 6 (Noble legado): Se puede activar libremente
         },
         "futuro": {
             0: ["presente-0", "presente-2"],  # Futuro 1: Requiere Presente 1 y Presente 3
             1: ["futuro-0"],  # Futuro 2: Requiere Futuro 1
-            2: ["pasado-4"],  # Futuro 3: Requiere Pasado 5 (semilla del árbol)
-            3: []   # Futuro 4 (Noble legado): Se puede activar libremente
+            2: [],  # Futuro 3: Se puede activar libremente
+            3: ["pasado-4"],  # Futuro 4 (Semilla árbol): Requiere Pasado 5 (semilla en pasado)
+            4: []   # Futuro 5 (Noble legado): Se puede activar libremente
         }
     }
     
